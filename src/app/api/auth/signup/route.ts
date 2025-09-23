@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,20 +14,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Creating Supabase client...')
-    const supabase = await createServerComponentClient()
+    console.log('Creating Supabase admin client...')
 
-    console.log('Attempting signup...')
-    // 회원가입
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          phone,
+    // Admin 클라이언트로 이메일 확인 없이 사용자 생성
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
         }
       }
+    )
+
+    console.log('Attempting signup with admin client...')
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: {
+        name,
+        phone,
+      },
+      email_confirm: true, // 이메일 확인을 자동으로 완료
     })
 
     console.log('Signup result:', { data: data ? 'success' : 'no data', error: error ? error.message : 'none' })

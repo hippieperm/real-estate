@@ -33,7 +33,9 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
+      console.log('Attempting login for:', data.email)
+
+      const response = await fetch(`${window.location.origin}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,9 +43,17 @@ export default function LoginPage() {
         body: JSON.stringify(data),
       })
 
+      console.log('Login response status:', response.status, response.statusText)
+
       const result = await response.json()
+      console.log('Login response data:', result)
 
       if (!response.ok) {
+        console.error('Login failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          result
+        })
         throw new Error(result.error || '로그인에 실패했습니다')
       }
 
@@ -51,7 +61,11 @@ export default function LoginPage() {
       window.location.href = "/"
     } catch (error) {
       console.error("Login error:", error)
-      alert(error instanceof Error ? error.message : "로그인에 실패했습니다. 다시 시도해주세요.")
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert("로그인에 실패했습니다. 다시 시도해주세요.")
+      }
     } finally {
       setIsLoading(false)
     }
