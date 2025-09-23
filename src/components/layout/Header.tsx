@@ -1,11 +1,20 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Menu, X, Building2, User, LogIn } from "lucide-react"
-import { useState, useEffect } from "react"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Menu,
+  X,
+  Building2,
+  User,
+  LogIn,
+  LogOut,
+  Settings,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
   { name: "홈", href: "/" },
@@ -14,28 +23,31 @@ const navigation = [
   { name: "지하철역별", href: "/stations" },
   { name: "지역별", href: "/regions" },
   { name: "임대·임차 의뢰", href: "/inquiry" },
-]
+];
 
 export default function Header() {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { user, loading, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 w-full transition-all duration-300",
-      scrolled
-        ? "bg-white/95 backdrop-blur-xl shadow-elegant border-b border-slate-200/50"
-        : "bg-white/90 backdrop-blur-sm"
-    )}>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "bg-white/95 backdrop-blur-xl shadow-elegant border-b border-slate-200/50"
+          : "bg-white/90 backdrop-blur-sm"
+      )}
+    >
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
         <div className="flex items-center animate-slide-in-left">
           <Link href="/" className="flex items-center space-x-3 group">
@@ -63,34 +75,64 @@ export default function Header() {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {item.name}
-              <span className={cn(
-                "absolute bottom-0 left-1/2 h-0.5 bg-blue-600 transition-all duration-300 transform -translate-x-1/2",
-                pathname === item.href ? "w-8" : "w-0 group-hover:w-6"
-              )}></span>
+              <span
+                className={cn(
+                  "absolute bottom-0 left-1/2 h-0.5 bg-blue-600 transition-all duration-300 transform -translate-x-1/2",
+                  pathname === item.href ? "w-8" : "w-0 group-hover:w-6"
+                )}
+              ></span>
             </Link>
           ))}
         </div>
 
         <div className="hidden md:flex md:items-center md:gap-x-3 animate-slide-in-right">
-          <Link href="/auth/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="group transition-all duration-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900"
-            >
-              <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-              로그인
-            </Button>
-          </Link>
-          <Link href="/auth/signup">
-            <Button
-              size="sm"
-              className="gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <User className="mr-2 h-4 w-4" />
-              회원가입
-            </Button>
-          </Link>
+          {loading ? (
+            <div className="flex items-center gap-x-3">
+              <div className="w-8 h-8 bg-slate-200 rounded-full animate-pulse"></div>
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-x-3">
+              <div className="flex items-center gap-x-2 text-slate-700">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium">
+                  {user.email?.split("@")[0] || "사용자"}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="group transition-all duration-300 hover:bg-red-50 text-slate-700 hover:text-red-600"
+              >
+                <LogOut className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                로그아웃
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="group transition-all duration-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900"
+                >
+                  <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                  로그인
+                </Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button
+                  size="sm"
+                  className="gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  회원가입
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="flex md:hidden">
@@ -111,10 +153,12 @@ export default function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      <div className={cn(
-        "md:hidden transition-all duration-300 ease-in-out overflow-hidden",
-        mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-      )}>
+      <div
+        className={cn(
+          "md:hidden transition-all duration-300 ease-in-out overflow-hidden",
+          mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        )}
+      >
         <div className="bg-white/95 backdrop-blur-xl border-t border-slate-200/50">
           <div className="space-y-1 px-4 pb-6 pt-4">
             {navigation.map((item, index) => (
@@ -134,27 +178,53 @@ export default function Header() {
               </Link>
             ))}
             <div className="mt-6 space-y-3 pt-4 border-t border-slate-200/50">
-              <Link href="/auth/login">
-                <Button
-                  variant="outline"
-                  className="w-full h-12 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all duration-300"
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  로그인
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button
-                  className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  회원가입
-                </Button>
-              </Link>
+              {loading ? (
+                <div className="w-full h-12 bg-slate-200 rounded-lg animate-pulse"></div>
+              ) : user ? (
+                <>
+                  <div className="flex items-center gap-x-3 p-3 bg-blue-50 rounded-lg">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">
+                        {user.email?.split("@")[0] || "사용자"}
+                      </p>
+                      <p className="text-xs text-slate-600">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={signOut}
+                    className="w-full h-12 border-red-200 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 transition-all duration-300"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    로그아웃
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/login">
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all duration-300"
+                    >
+                      <LogIn className="mr-2 h-4 w-4" />
+                      로그인
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300">
+                      <User className="mr-2 h-4 w-4" />
+                      회원가입
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
     </header>
-  )
+  );
 }
