@@ -103,7 +103,7 @@ export default function LoginPage() {
                       {...register("email")}
                       type="email"
                       placeholder="example@email.com"
-                      className="h-12 pl-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                   </div>
                   {errors.email && (
@@ -123,7 +123,7 @@ export default function LoginPage() {
                       {...register("password")}
                       type={showPassword ? "text" : "password"}
                       placeholder="비밀번호를 입력하세요"
-                      className="h-12 pl-10 pr-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 pr-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                     <button
                       type="button"

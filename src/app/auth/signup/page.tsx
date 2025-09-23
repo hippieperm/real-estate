@@ -116,7 +116,7 @@ export default function SignupPage() {
                     <Input
                       {...register("name")}
                       placeholder="이름을 입력하세요"
-                      className="h-12 pl-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                   </div>
                   {errors.name && (
@@ -136,7 +136,7 @@ export default function SignupPage() {
                       {...register("email")}
                       type="email"
                       placeholder="example@email.com"
-                      className="h-12 pl-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                   </div>
                   {errors.email && (
@@ -155,7 +155,7 @@ export default function SignupPage() {
                     <Input
                       {...register("phone")}
                       placeholder="010-0000-0000"
-                      className="h-12 pl-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                   </div>
                   {errors.phone && (
@@ -175,7 +175,7 @@ export default function SignupPage() {
                       {...register("password")}
                       type={showPassword ? "text" : "password"}
                       placeholder="8자 이상의 비밀번호"
-                      className="h-12 pl-10 pr-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 pr-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                     <button
                       type="button"
@@ -202,7 +202,7 @@ export default function SignupPage() {
                       {...register("confirmPassword")}
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="비밀번호를 다시 입력하세요"
-                      className="h-12 pl-10 pr-10 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                      className="h-12 pl-10 pr-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                     <button
                       type="button"
