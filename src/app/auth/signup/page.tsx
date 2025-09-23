@@ -85,6 +85,11 @@ export default function SignupPage() {
       const result = await response.json()
 
       if (!response.ok) {
+        console.error('Signup failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          result
+        })
         throw new Error(result.error || '회원가입에 실패했습니다')
       }
 
@@ -92,7 +97,11 @@ export default function SignupPage() {
       window.location.href = "/auth/login"
     } catch (error) {
       console.error("Signup error:", error)
-      alert(error instanceof Error ? error.message : "회원가입에 실패했습니다. 다시 시도해주세요.")
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert("회원가입에 실패했습니다. 다시 시도해주세요.")
+      }
     } finally {
       setIsLoading(false)
     }
