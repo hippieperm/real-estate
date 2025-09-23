@@ -106,14 +106,14 @@ export default async function HomePage() {
                 </Button>
               </Link>
               <Link href="/list">
-                <Button size="lg" variant="outline" className="group w-full sm:w-auto h-14 px-8 glass border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <Button size="lg" variant="outline" className="group w-full sm:w-auto h-14 px-8 bg-white/90 backdrop-blur-md border-white/50 hover:bg-white/95 text-slate-700 hover:text-blue-600 transition-all duration-300 hover:scale-105 shadow-lg">
                   <Search className="mr-3 h-5 w-5 transition-transform group-hover:scale-110" />
                   목록검색
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
               <Link href="/inquiry">
-                <Button size="lg" variant="outline" className="group w-full sm:w-auto h-14 px-8 glass border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <Button size="lg" variant="outline" className="group w-full sm:w-auto h-14 px-8 bg-white/90 backdrop-blur-md border-white/50 hover:bg-white/95 text-slate-700 hover:text-blue-600 transition-all duration-300 hover:scale-105 shadow-lg">
                   <FileText className="mr-3 h-5 w-5 transition-transform group-hover:scale-110" />
                   임대·임차 의뢰
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
