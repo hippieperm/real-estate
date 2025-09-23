@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { SuccessModal } from "@/components/ui/success-modal";
 import { ErrorModal } from "@/components/ui/error-modal";
+import { createClient } from "@/lib/supabase";
 import {
   LogIn,
   Mail,
@@ -55,31 +56,18 @@ export default function LoginPage() {
     try {
       console.log("Attempting login for:", data.email);
 
-      const response = await fetch(`${window.location.origin}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      const supabase = createClient();
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
       });
 
-      console.log(
-        "Login response status:",
-        response.status,
-        response.statusText
-      );
-
-      const result = await response.json();
-      console.log("Login response data:", result);
-
-      if (!response.ok) {
-        console.error("Login failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          result,
-        });
-        throw new Error(result.error || "로그인에 실패했습니다");
+      if (error) {
+        console.error("Login error:", error);
+        throw new Error(error.message || "로그인에 실패했습니다");
       }
+
+      console.log("Login successful for user:", authData.user?.id);
 
       // 성공 모달 표시
       setShowSuccessModal(true);
@@ -98,6 +86,7 @@ export default function LoginPage() {
 
   const handleSuccessModalConfirm = () => {
     setShowSuccessModal(false);
+    // AuthContext가 자동으로 상태를 업데이트하므로 페이지 새로고침 없이 리다이렉트
     window.location.href = "/";
   };
 
