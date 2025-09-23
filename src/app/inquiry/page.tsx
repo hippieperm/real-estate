@@ -99,7 +99,7 @@ ${data.message}
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         {/* Animated Background */}
-        <div className="absolute inset-0 gradient-mesh opacity-30"></div>
+        <div className="fixed inset-0 gradient-mesh opacity-30 -z-10"></div>
         <div className="absolute top-20 left-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-float"></div>
         <div className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
 
@@ -166,7 +166,7 @@ ${data.message}
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Animated Background */}
-      <div className="absolute inset-0 gradient-mesh opacity-30"></div>
+      <div className="fixed inset-0 gradient-mesh opacity-30 -z-10"></div>
       <div className="absolute top-20 left-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-float"></div>
       <div className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
       <div className="absolute bottom-20 left-20 w-24 h-24 bg-pink-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
