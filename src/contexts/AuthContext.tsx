@@ -48,16 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      const { error } = await supabase.auth.signOut();
 
-      if (response.ok) {
-        setUser(null);
-        // 페이지 새로고침으로 상태 동기화
-        window.location.reload();
+      if (error) {
+        console.error("로그아웃 실패:", error);
       } else {
-        console.error("로그아웃 실패");
+        // onAuthStateChange가 자동으로 상태를 업데이트하므로 수동으로 설정할 필요 없음
+        console.log("로그아웃 성공");
       }
     } catch (error) {
       console.error("로그아웃 오류:", error);
