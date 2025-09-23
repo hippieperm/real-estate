@@ -25,18 +25,45 @@ const signupSchema = z.object({
 
 type SignupForm = z.infer<typeof signupSchema>
 
+// 전화번호 포맷팅 함수
+const formatPhoneNumber = (value: string) => {
+  // 숫자만 추출
+  const phoneNumber = value.replace(/[^\d]/g, '')
+
+  // 길이에 따라 포맷팅
+  if (phoneNumber.length <= 3) {
+    return phoneNumber
+  } else if (phoneNumber.length <= 7) {
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`
+  } else if (phoneNumber.length <= 11) {
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`
+  }
+
+  // 11자리 초과시 자르기
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`
+}
+
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [phoneValue, setPhoneValue] = useState("")
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
   })
+
+  // 전화번호 입력 핸들러
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    setPhoneValue(formatted)
+    setValue("phone", formatted)
+  }
 
   const onSubmit = async (data: SignupForm) => {
     setIsLoading(true)
@@ -153,8 +180,10 @@ export default function SignupPage() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
-                      {...register("phone")}
+                      value={phoneValue}
+                      onChange={handlePhoneChange}
                       placeholder="010-0000-0000"
+                      maxLength={13}
                       className="h-12 pl-10 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                     />
                   </div>

@@ -38,10 +38,29 @@ const popularAreas = [
   "송파구 잠실동", "광진구 건대입구", "성동구 성수동", "마포구 상암동"
 ]
 
+// 전화번호 포맷팅 함수
+const formatPhoneNumber = (value: string) => {
+  // 숫자만 추출
+  const phoneNumber = value.replace(/[^\d]/g, '')
+
+  // 길이에 따라 포맷팅
+  if (phoneNumber.length <= 3) {
+    return phoneNumber
+  } else if (phoneNumber.length <= 7) {
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`
+  } else if (phoneNumber.length <= 11) {
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`
+  }
+
+  // 11자리 초과시 자르기
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`
+}
+
 export default function InquiryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [selectedPropertyType, setSelectedPropertyType] = useState("")
+  const [phoneValue, setPhoneValue] = useState("")
 
   const {
     register,
@@ -53,6 +72,13 @@ export default function InquiryPage() {
   } = useForm<InquiryForm>({
     resolver: zodResolver(inquirySchema),
   })
+
+  // 전화번호 입력 핸들러
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    setPhoneValue(formatted)
+    setValue("phone", formatted)
+  }
 
   const onSubmit = async (data: InquiryForm) => {
     setIsSubmitting(true)
@@ -272,9 +298,11 @@ ${data.message}
                 <div>
                   <label className="text-sm font-semibold text-slate-700 mb-2 block">연락처 *</label>
                   <Input
-                    {...register("phone")}
+                    value={phoneValue}
+                    onChange={handlePhoneChange}
                     placeholder="010-0000-0000"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    maxLength={13}
+                    className="h-12 bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
