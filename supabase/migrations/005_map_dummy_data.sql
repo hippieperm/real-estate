@@ -87,19 +87,19 @@ FROM listings l
 WHERE l.code IN ('GN001', 'GN002', 'GN003', 'GN004', 'SC001', 'SC002', 'SP001', 'SP002', 'MP001', 'MP002', 'YS001', 'YS002', 'JG001', 'JG002', 'YD001', 'YD002', 'SD001', 'SD002', 'GJ001', 'GJ002', 'SB001', 'SB002');
 
 -- 매물 테마 연결 더미 데이터
-INSERT INTO listing_themes (listing_id, theme_id, created_at)
+INSERT INTO listing_themes (listing_id, theme_id)
 SELECT 
     l.id,
-    t.id,
-    NOW()
+    t.id
 FROM listings l
 CROSS JOIN theme_categories t
 WHERE l.code IN ('GN001', 'GN002', 'GN003', 'GN004', 'SC001', 'SC002', 'SP001', 'SP002', 'MP001', 'MP002', 'YS001', 'YS002', 'JG001', 'JG002', 'YD001', 'YD002', 'SD001', 'SD002', 'GJ001', 'GJ002', 'SB001', 'SB002')
 AND t.key IN ('location', 'transportation', 'facility')
-LIMIT 60;
+LIMIT 60
+ON CONFLICT (listing_id, theme_id) DO NOTHING;
 
 -- 매물 역 연결 더미 데이터 (주요 지하철역과의 거리)
-INSERT INTO listing_stations (listing_id, station_id, distance_m, created_at)
+INSERT INTO listing_stations (listing_id, station_id, distance_m)
 SELECT 
     l.id,
     s.id,
@@ -115,20 +115,18 @@ SELECT
         WHEN l.code LIKE 'GJ%' THEN 200 + (random() * 300)::int
         WHEN l.code LIKE 'SB%' THEN 400 + (random() * 500)::int
         ELSE 500 + (random() * 600)::int
-    END,
-    NOW()
+    END
 FROM listings l
 CROSS JOIN stations s
 WHERE l.code IN ('GN001', 'GN002', 'GN003', 'GN004', 'SC001', 'SC002', 'SP001', 'SP002', 'MP001', 'MP002', 'YS001', 'YS002', 'JG001', 'JG002', 'YD001', 'YD002', 'SD001', 'SD002', 'GJ001', 'GJ002', 'SB001', 'SB002')
 AND s.name IN ('강남역', '서초역', '잠실역', '홍대입구역', '이촌역', '명동역', '여의도역', '성수역', '건대입구역', '성신여대입구역')
-LIMIT 200;
+ON CONFLICT (listing_id, station_id) DO NOTHING;
 
 -- 매물 지역 연결 더미 데이터
-INSERT INTO listing_regions (listing_id, region_id, created_at)
+INSERT INTO listing_regions (listing_id, region_id)
 SELECT 
     l.id,
-    r.id,
-    NOW()
+    r.id
 FROM listings l
 CROSS JOIN regions r
 WHERE l.code IN ('GN001', 'GN002', 'GN003', 'GN004', 'SC001', 'SC002', 'SP001', 'SP002', 'MP001', 'MP002', 'YS001', 'YS002', 'JG001', 'JG002', 'YD001', 'YD002', 'SD001', 'SD002', 'GJ001', 'GJ002', 'SB001', 'SB002')
@@ -144,4 +142,5 @@ AND (
     OR (l.code LIKE 'GJ%' AND r.dong IN ('화양동', '구의동'))
     OR (l.code LIKE 'SB%' AND r.dong IN ('보문동', '안암동'))
 )
-LIMIT 50;
+LIMIT 50
+ON CONFLICT (listing_id, region_id) DO NOTHING;
