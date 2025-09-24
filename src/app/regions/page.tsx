@@ -94,7 +94,7 @@ export default function RegionsPage() {
   }, [searchTerm, regions]);
 
   const formatPrice = (price: number) => {
-    return `${(price / 10000).toFixed(0)}만원`;
+    return `${new Intl.NumberFormat("ko-KR").format(price / 10000)}만원`;
   };
 
   return (
