@@ -42,6 +42,3 @@ INSERT INTO regions (sido, sigungu, dong, polygon) VALUES
 
 -- Note: profiles, listings, and inquiries data will be created when users register
 -- and agents create listings through the application interface
-
--- Refresh materialized view
-REFRESH MATERIALIZED VIEW listings_search;
