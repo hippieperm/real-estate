@@ -94,6 +94,10 @@ export default function InquiryPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
+  const [budgetMinValue, setBudgetMinValue] = useState("");
+  const [budgetMaxValue, setBudgetMaxValue] = useState("");
+  const [areaMinValue, setAreaMinValue] = useState("");
+  const [areaMaxValue, setAreaMaxValue] = useState("");
 
   const {
     register,
@@ -113,6 +117,44 @@ export default function InquiryPage() {
     setValue("phone", formatted);
   };
 
+  // 예산 입력 핸들러
+  const handleBudgetMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setBudgetMinValue(formatted);
+    setValue("budget_min", Number(value));
+  };
+
+  const handleBudgetMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setBudgetMaxValue(formatted);
+    setValue("budget_max", Number(value));
+  };
+
+  // 면적 입력 핸들러
+  const handleAreaMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setAreaMinValue(formatted);
+    setValue("area_min", Number(value));
+  };
+
+  const handleAreaMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setAreaMaxValue(formatted);
+    setValue("area_max", Number(value));
+  };
+
   const onSubmit = async (data: InquiryForm) => {
     setIsSubmitting(true);
 
@@ -125,7 +167,15 @@ export default function InquiryPage() {
           propertyTypes.find((pt) => pt.value === data.property_type)?.label
         }
 희망 지역: ${data.location}
-예산: ${data.budget_min || 0}만원 ~ ${data.budget_max || "제한없음"}만원
+예산: ${
+          data.budget_min
+            ? new Intl.NumberFormat("ko-KR").format(data.budget_min)
+            : 0
+        }만원 ~ ${
+          data.budget_max
+            ? new Intl.NumberFormat("ko-KR").format(data.budget_max)
+            : "제한없음"
+        }만원
 희망 면적: ${data.area_min || 0}평 ~ ${data.area_max || "제한없음"}평
 입주 희망일: ${data.move_in_date || "협의"}
 이메일: ${data.email || "없음"}
@@ -502,17 +552,15 @@ ${data.message}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    {...register("budget_min", { valueAsNumber: true })}
-                    type="number"
+                    value={budgetMinValue}
+                    onChange={handleBudgetMinChange}
                     placeholder="최소 예산"
-                    min="0"
                     className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                   <Input
-                    {...register("budget_max", { valueAsNumber: true })}
-                    type="number"
+                    value={budgetMaxValue}
+                    onChange={handleBudgetMaxChange}
                     placeholder="최대 예산"
-                    min="0"
                     className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                 </div>
@@ -525,17 +573,15 @@ ${data.message}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    {...register("area_min", { valueAsNumber: true })}
-                    type="number"
+                    value={areaMinValue}
+                    onChange={handleAreaMinChange}
                     placeholder="최소 면적"
-                    min="0"
                     className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                   <Input
-                    {...register("area_max", { valueAsNumber: true })}
-                    type="number"
+                    value={areaMaxValue}
+                    onChange={handleAreaMaxChange}
                     placeholder="최대 면적"
-                    min="0"
                     className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                 </div>
