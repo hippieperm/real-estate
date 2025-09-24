@@ -1,19 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { MessageSquare, Building, MapPin, Phone, Mail, Clock, CheckCircle, Star, Users, ArrowRight } from "lucide-react"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  MessageSquare,
+  Building,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle,
+  Star,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 
 const inquirySchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
   phone: z.string().min(10, "올바른 연락처를 입력해주세요"),
-  email: z.string().email("올바른 이메일을 입력해주세요").optional().or(z.literal("")),
+  email: z
+    .string()
+    .email("올바른 이메일을 입력해주세요")
+    .optional()
+    .or(z.literal("")),
   property_type: z.string().min(1, "희망 매물 유형을 선택해주세요"),
   location: z.string().min(1, "희망 지역을 입력해주세요"),
   budget_min: z.number().min(0, "최소 예산을 입력해주세요").optional(),
@@ -22,45 +43,57 @@ const inquirySchema = z.object({
   area_max: z.number().min(0, "최대 면적을 입력해주세요").optional(),
   move_in_date: z.string().optional(),
   message: z.string().min(10, "10자 이상의 상세 요청사항을 입력해주세요"),
-})
+});
 
-type InquiryForm = z.infer<typeof inquirySchema>
+type InquiryForm = z.infer<typeof inquirySchema>;
 
 const propertyTypes = [
   { value: "office", label: "사무실" },
   { value: "retail", label: "상가" },
   { value: "whole_building", label: "통건물" },
   { value: "residential", label: "주택형 사무실" },
-]
+];
 
 const popularAreas = [
-  "강남구 역삼동", "강남구 논현동", "강남구 삼성동", "서초구 서초동",
-  "송파구 잠실동", "광진구 건대입구", "성동구 성수동", "마포구 상암동"
-]
+  "강남구 역삼동",
+  "강남구 논현동",
+  "강남구 삼성동",
+  "서초구 서초동",
+  "송파구 잠실동",
+  "광진구 건대입구",
+  "성동구 성수동",
+  "마포구 상암동",
+];
 
 // 전화번호 포맷팅 함수
 const formatPhoneNumber = (value: string) => {
   // 숫자만 추출
-  const phoneNumber = value.replace(/[^\d]/g, '')
+  const phoneNumber = value.replace(/[^\d]/g, "");
 
   // 길이에 따라 포맷팅
   if (phoneNumber.length <= 3) {
-    return phoneNumber
+    return phoneNumber;
   } else if (phoneNumber.length <= 7) {
-    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
   } else if (phoneNumber.length <= 11) {
-    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`
+    return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+      3,
+      7
+    )}-${phoneNumber.slice(7)}`;
   }
 
   // 11자리 초과시 자르기
-  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`
-}
+  return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(
+    3,
+    7
+  )}-${phoneNumber.slice(7, 11)}`;
+};
 
 export default function InquiryPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [selectedPropertyType, setSelectedPropertyType] = useState("")
-  const [phoneValue, setPhoneValue] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedPropertyType, setSelectedPropertyType] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
 
   const {
     register,
@@ -71,55 +104,57 @@ export default function InquiryPage() {
     reset,
   } = useForm<InquiryForm>({
     resolver: zodResolver(inquirySchema),
-  })
+  });
 
   // 전화번호 입력 핸들러
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value)
-    setPhoneValue(formatted)
-    setValue("phone", formatted)
-  }
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhoneValue(formatted);
+    setValue("phone", formatted);
+  };
 
   const onSubmit = async (data: InquiryForm) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const inquiryData = {
         name: data.name,
         phone: data.phone,
         message: `
-희망 매물 유형: ${propertyTypes.find(pt => pt.value === data.property_type)?.label}
+희망 매물 유형: ${
+          propertyTypes.find((pt) => pt.value === data.property_type)?.label
+        }
 희망 지역: ${data.location}
-예산: ${data.budget_min || 0}만원 ~ ${data.budget_max || '제한없음'}만원
-희망 면적: ${data.area_min || 0}평 ~ ${data.area_max || '제한없음'}평
-입주 희망일: ${data.move_in_date || '협의'}
-이메일: ${data.email || '없음'}
+예산: ${data.budget_min || 0}만원 ~ ${data.budget_max || "제한없음"}만원
+희망 면적: ${data.area_min || 0}평 ~ ${data.area_max || "제한없음"}평
+입주 희망일: ${data.move_in_date || "협의"}
+이메일: ${data.email || "없음"}
 
 상세 요청사항:
 ${data.message}
         `.trim(),
-        source: 'web' as const,
-      }
+        source: "web" as const,
+      };
 
-      const response = await fetch('/api/inquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(inquiryData),
-      })
+      });
 
       if (response.ok) {
-        setIsSubmitted(true)
-        reset()
+        setIsSubmitted(true);
+        reset();
       } else {
-        throw new Error('문의 전송에 실패했습니다')
+        throw new Error("문의 전송에 실패했습니다");
       }
     } catch (error) {
-      console.error('Inquiry submission error:', error)
-      alert('문의 전송에 실패했습니다. 다시 시도해주세요.')
+      console.error("Inquiry submission error:", error);
+      alert("문의 전송에 실패했습니다. 다시 시도해주세요.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (isSubmitted) {
     return (
@@ -127,7 +162,10 @@ ${data.message}
         {/* Animated Background */}
         <div className="fixed inset-0 gradient-mesh opacity-30 -z-10"></div>
         <div className="absolute top-20 left-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-float"></div>
-        <div className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
+        <div
+          className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float"
+          style={{ animationDelay: "1s" }}
+        ></div>
 
         <div className="relative z-10 min-h-screen flex items-center justify-center py-12">
           <div className="max-w-2xl mx-auto px-4">
@@ -144,22 +182,30 @@ ${data.message}
                   문의가 접수되었습니다
                 </h1>
                 <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                  전문 상담사가 <span className="font-semibold text-blue-600">24시간 내</span>에 연락드리겠습니다.
+                  전문 상담사가{" "}
+                  <span className="font-semibold text-blue-600">24시간 내</span>
+                  에 연락드리겠습니다.
                 </p>
 
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="flex items-center justify-center gap-2">
                       <Clock className="h-4 w-4 text-blue-600" />
-                      <span className="text-slate-700">평일 09:00 ~ 18:00 우선 상담</span>
+                      <span className="text-slate-700">
+                        평일 09:00 ~ 18:00 우선 상담
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Phone className="h-4 w-4 text-purple-600" />
-                      <span className="text-slate-700">주말/공휴일 다음 영업일</span>
+                      <span className="text-slate-700">
+                        주말/공휴일 다음 영업일
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Building className="h-4 w-4 text-emerald-600" />
-                      <span className="text-slate-700">급한 문의: 02-1234-5678</span>
+                      <span className="text-slate-700">
+                        급한 문의: 02-1234-5678
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -174,7 +220,7 @@ ${data.message}
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => window.location.href = '/'}
+                    onClick={() => (window.location.href = "/")}
                     className="glass border-white/50 hover:bg-white/20 transition-all duration-300 hover:scale-105 h-12 px-8"
                   >
                     홈으로 돌아가기
@@ -186,7 +232,7 @@ ${data.message}
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -194,8 +240,14 @@ ${data.message}
       {/* Animated Background */}
       <div className="fixed inset-0 gradient-mesh opacity-30 -z-10"></div>
       <div className="absolute top-20 left-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-float"></div>
-      <div className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute bottom-20 left-20 w-24 h-24 bg-pink-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
+      <div
+        className="absolute top-40 right-20 w-32 h-32 bg-purple-400/20 rounded-full blur-xl animate-float"
+        style={{ animationDelay: "1s" }}
+      ></div>
+      <div
+        className="absolute bottom-20 left-20 w-24 h-24 bg-pink-400/20 rounded-full blur-xl animate-float"
+        style={{ animationDelay: "2s" }}
+      ></div>
 
       {/* Hero Section */}
       <div className="relative z-10 pt-20 pb-16">
@@ -209,8 +261,10 @@ ${data.message}
               <span className="text-slate-800">의뢰하기</span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl md:text-2xl text-slate-600 leading-relaxed mb-12">
-              원하시는 조건을 알려주시면, <span className="font-semibold text-blue-600">전문가</span>가
-              <span className="font-semibold text-purple-600"> 맞춤 매물</span>을 찾아드립니다
+              원하시는 조건을 알려주시면,{" "}
+              <span className="font-semibold text-blue-600">전문가</span>가
+              <span className="font-semibold text-purple-600"> 맞춤 매물</span>
+              을 찾아드립니다
             </p>
 
             {/* Features */}
@@ -220,25 +274,37 @@ ${data.message}
                   <Clock className="h-12 w-12 text-blue-600 mx-auto" />
                   <div className="absolute -inset-2 bg-blue-500/20 rounded-lg blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">빠른 응답</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  빠른 응답
+                </h3>
                 <p className="text-slate-600">24시간 내 전문가 연락</p>
               </div>
 
-              <div className="glass border-white/50 rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
+              <div
+                className="glass border-white/50 rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 animate-slide-in-left"
+                style={{ animationDelay: "0.1s" }}
+              >
                 <div className="relative mb-4">
                   <Building className="h-12 w-12 text-purple-600 mx-auto" />
                   <div className="absolute -inset-2 bg-purple-500/20 rounded-lg blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">맞춤 추천</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  맞춤 추천
+                </h3>
                 <p className="text-slate-600">조건에 딱 맞는 매물 선별</p>
               </div>
 
-              <div className="glass border-white/50 rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 animate-slide-in-left" style={{ animationDelay: '0.2s' }}>
+              <div
+                className="glass border-white/50 rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 animate-slide-in-left"
+                style={{ animationDelay: "0.2s" }}
+              >
                 <div className="relative mb-4">
                   <Users className="h-12 w-12 text-emerald-600 mx-auto" />
                   <div className="absolute -inset-2 bg-emerald-500/20 rounded-lg blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">전문 상담</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  전문 상담
+                </h3>
                 <p className="text-slate-600">10년 경력 전문가 직접 상담</p>
               </div>
             </div>
@@ -273,19 +339,25 @@ ${data.message}
                   <Phone className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">연락처 정보</CardTitle>
-                  <CardDescription className="text-slate-600">문의 응답을 위한 연락처를 입력해주세요</CardDescription>
+                  <CardTitle className="text-xl text-slate-800">
+                    연락처 정보
+                  </CardTitle>
+                  <CardDescription className="text-slate-600">
+                    문의 응답을 위한 연락처를 입력해주세요
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-2 block">이름 *</label>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                    이름 *
+                  </label>
                   <Input
                     {...register("name")}
                     placeholder="이름을 입력하세요"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                   {errors.name && (
                     <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
@@ -296,7 +368,9 @@ ${data.message}
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-2 block">연락처 *</label>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                    연락처 *
+                  </label>
                   <Input
                     value={phoneValue}
                     onChange={handlePhoneChange}
@@ -314,12 +388,14 @@ ${data.message}
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-2 block">이메일 (선택)</label>
+                <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                  이메일 (선택)
+                </label>
                 <Input
                   {...register("email")}
                   type="email"
                   placeholder="example@email.com"
-                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                 />
                 {errors.email && (
                   <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
@@ -332,31 +408,44 @@ ${data.message}
           </Card>
 
           {/* Property Requirements */}
-          <Card className="glass border-white/50 shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in" style={{ animationDelay: '0.1s' }}>
+          <Card
+            className="glass border-white/50 shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in"
+            style={{ animationDelay: "0.1s" }}
+          >
             <CardHeader className="pb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 gradient-purple rounded-lg flex items-center justify-center">
                   <Building className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">희망 조건</CardTitle>
-                  <CardDescription className="text-slate-600">원하시는 매물 조건을 선택해주세요</CardDescription>
+                  <CardTitle className="text-xl text-slate-800">
+                    희망 조건
+                  </CardTitle>
+                  <CardDescription className="text-slate-600">
+                    원하시는 매물 조건을 선택해주세요
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Property Type */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-3 block">매물 유형 *</label>
+                <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                  매물 유형 *
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {propertyTypes.map((type) => (
                     <Button
                       key={type.value}
                       type="button"
-                      variant={selectedPropertyType === type.value ? "default" : "outline"}
+                      variant={
+                        selectedPropertyType === type.value
+                          ? "default"
+                          : "outline"
+                      }
                       onClick={() => {
-                        setSelectedPropertyType(type.value)
-                        setValue("property_type", type.value)
+                        setSelectedPropertyType(type.value);
+                        setValue("property_type", type.value);
                       }}
                       className={`h-14 transition-all duration-300 ${
                         selectedPropertyType === type.value
@@ -378,11 +467,13 @@ ${data.message}
 
               {/* Location */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-3 block">희망 지역 *</label>
+                <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                  희망 지역 *
+                </label>
                 <Input
                   {...register("location")}
                   placeholder="예: 강남구 역삼동, 테헤란로 인근"
-                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 mb-3"
+                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 mb-3 text-slate-900"
                 />
                 <div className="flex flex-wrap gap-2">
                   {popularAreas.map((area) => (
@@ -406,68 +497,81 @@ ${data.message}
 
               {/* Budget */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-3 block">예산 (보증금, 만원)</label>
+                <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                  예산 (보증금, 만원)
+                </label>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     {...register("budget_min", { valueAsNumber: true })}
                     type="number"
                     placeholder="최소 예산"
                     min="0"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                   <Input
                     {...register("budget_max", { valueAsNumber: true })}
                     type="number"
                     placeholder="최대 예산"
                     min="0"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Area */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-3 block">희망 면적 (평)</label>
+                <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                  희망 면적 (평)
+                </label>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     {...register("area_min", { valueAsNumber: true })}
                     type="number"
                     placeholder="최소 면적"
                     min="0"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                   <Input
                     {...register("area_max", { valueAsNumber: true })}
                     type="number"
                     placeholder="최대 면적"
                     min="0"
-                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                    className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Move-in Date */}
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-3 block">입주 희망일</label>
+                <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                  입주 희망일
+                </label>
                 <Input
                   {...register("move_in_date")}
                   type="date"
-                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                  className="h-12 bg-white/80 border-slate-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Message */}
-          <Card className="glass border-white/50 shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+          <Card
+            className="glass border-white/50 shadow-card hover:shadow-card-hover transition-all duration-300 animate-scale-in"
+            style={{ animationDelay: "0.2s" }}
+          >
             <CardHeader className="pb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 gradient-ocean rounded-lg flex items-center justify-center">
                   <MessageSquare className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">상세 요청사항</CardTitle>
-                  <CardDescription className="text-slate-600">추가 요구사항이나 특별한 조건이 있으시면 자세히 적어주세요</CardDescription>
+                  <CardTitle className="text-xl text-slate-800">
+                    상세 요청사항
+                  </CardTitle>
+                  <CardDescription className="text-slate-600">
+                    추가 요구사항이나 특별한 조건이 있으시면 자세히 적어주세요
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -488,26 +592,39 @@ ${data.message}
           </Card>
 
           {/* Privacy Notice */}
-          <Card className="glass border-white/50 shadow-card animate-scale-in" style={{ animationDelay: '0.3s' }}>
+          <Card
+            className="glass border-white/50 shadow-card animate-scale-in"
+            style={{ animationDelay: "0.3s" }}
+          >
             <CardContent className="py-6">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                   <CheckCircle className="h-4 w-4 text-slate-600" />
                 </div>
                 <div className="text-sm text-slate-600">
-                  <h4 className="font-semibold text-slate-800 mb-3">개인정보 처리 안내</h4>
+                  <h4 className="font-semibold text-slate-800 mb-3">
+                    개인정보 처리 안내
+                  </h4>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1.5 w-1 h-1 rounded-full bg-blue-500 flex-shrink-0"></span>
-                      <span>수집된 개인정보는 매물 상담 및 연락 목적으로만 사용됩니다.</span>
+                      <span>
+                        수집된 개인정보는 매물 상담 및 연락 목적으로만
+                        사용됩니다.
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1.5 w-1 h-1 rounded-full bg-blue-500 flex-shrink-0"></span>
-                      <span>개인정보는 문의 처리 완료 후 1년간 보관 후 삭제됩니다.</span>
+                      <span>
+                        개인정보는 문의 처리 완료 후 1년간 보관 후 삭제됩니다.
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1.5 w-1 h-1 rounded-full bg-blue-500 flex-shrink-0"></span>
-                      <span>정보 제공을 거부할 수 있으나, 이 경우 상담 서비스 이용이 제한됩니다.</span>
+                      <span>
+                        정보 제공을 거부할 수 있으나, 이 경우 상담 서비스 이용이
+                        제한됩니다.
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -516,7 +633,10 @@ ${data.message}
           </Card>
 
           {/* Submit */}
-          <div className="text-center animate-scale-in" style={{ animationDelay: '0.4s' }}>
+          <div
+            className="text-center animate-scale-in"
+            style={{ animationDelay: "0.4s" }}
+          >
             <Button
               type="submit"
               disabled={isSubmitting}
@@ -544,5 +664,5 @@ ${data.message}
         </form>
       </div>
     </div>
-  )
+  );
 }

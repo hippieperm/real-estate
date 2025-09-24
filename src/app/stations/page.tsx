@@ -188,7 +188,7 @@ export default function StationsPage() {
                   placeholder="지하철역명, 노선을 검색해보세요..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-14 pl-12 pr-4 text-lg bg-white/90 border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
+                  className="h-14 pl-12 pr-4 text-lg bg-white/90 border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200 text-slate-900"
                 />
               </div>
             </div>
