@@ -27,6 +27,10 @@ export default function MapSearchPage() {
     property_type: [],
     themes: [],
   });
+  const [depositMinValue, setDepositMinValue] = useState("0");
+  const [depositMaxValue, setDepositMaxValue] = useState("100,000");
+  const [pyeongMinValue, setPyeongMinValue] = useState("0");
+  const [pyeongMaxValue, setPyeongMaxValue] = useState("500");
   const [showFilters, setShowFilters] = useState(true);
   const [selectedListing, setSelectedListing] = useState<any>(null);
 
@@ -89,6 +93,43 @@ export default function MapSearchPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 포맷팅 핸들러 함수들
+  const handleDepositMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setDepositMinValue(formatted);
+    setFilters({ ...filters, min_deposit: Number(value) || 0 });
+  };
+
+  const handleDepositMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setDepositMaxValue(formatted);
+    setFilters({ ...filters, max_deposit: Number(value) || 100000 });
+  };
+
+  const handlePyeongMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setPyeongMinValue(formatted);
+    setFilters({ ...filters, min_pyeong: Number(value) || 0 });
+  };
+
+  const handlePyeongMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, "");
+    const formatted = value
+      ? new Intl.NumberFormat("ko-KR").format(Number(value))
+      : "";
+    setPyeongMaxValue(formatted);
+    setFilters({ ...filters, max_pyeong: Number(value) || 500 });
   };
 
   const updateMapMarkers = (listings: any[]) => {
@@ -175,11 +216,8 @@ export default function MapSearchPage() {
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <Input
-                    type="number"
-                    value={filters.min_deposit}
-                    onChange={(e) =>
-                      setFilters({ ...filters, min_deposit: +e.target.value })
-                    }
+                    value={depositMinValue}
+                    onChange={handleDepositMinChange}
                     placeholder="최소 보증금"
                     className="h-11 text-center bg-white border-2 border-slate-400 focus:border-blue-500 focus:ring-blue-500/20 placeholder:text-slate-600 placeholder:font-medium shadow-sm text-slate-900"
                   />
@@ -187,11 +225,8 @@ export default function MapSearchPage() {
                 <span className="text-slate-500 font-medium">~</span>
                 <div className="flex-1">
                   <Input
-                    type="number"
-                    value={filters.max_deposit}
-                    onChange={(e) =>
-                      setFilters({ ...filters, max_deposit: +e.target.value })
-                    }
+                    value={depositMaxValue}
+                    onChange={handleDepositMaxChange}
                     placeholder="최대 보증금"
                     className="h-11 text-center bg-white border-2 border-slate-400 focus:border-blue-500 focus:ring-blue-500/20 placeholder:text-slate-600 placeholder:font-medium shadow-sm text-slate-900"
                   />
@@ -207,11 +242,8 @@ export default function MapSearchPage() {
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <Input
-                    type="number"
-                    value={filters.min_pyeong}
-                    onChange={(e) =>
-                      setFilters({ ...filters, min_pyeong: +e.target.value })
-                    }
+                    value={pyeongMinValue}
+                    onChange={handlePyeongMinChange}
                     placeholder="최소 면적"
                     className="h-11 text-center bg-white border-2 border-slate-400 focus:border-green-500 focus:ring-green-500/20 placeholder:text-slate-600 placeholder:font-medium shadow-sm text-slate-900"
                   />
@@ -219,11 +251,8 @@ export default function MapSearchPage() {
                 <span className="text-slate-500 font-medium">~</span>
                 <div className="flex-1">
                   <Input
-                    type="number"
-                    value={filters.max_pyeong}
-                    onChange={(e) =>
-                      setFilters({ ...filters, max_pyeong: +e.target.value })
-                    }
+                    value={pyeongMaxValue}
+                    onChange={handlePyeongMaxChange}
                     placeholder="최대 면적"
                     className="h-11 text-center bg-white border-2 border-slate-400 focus:border-green-500 focus:ring-green-500/20 placeholder:text-slate-600 placeholder:font-medium shadow-sm text-slate-900"
                   />
@@ -292,11 +321,19 @@ export default function MapSearchPage() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-lg text-slate-800">
-                        보증금 {formatPrice(listing.price_deposit)}만원
+                        보증금{" "}
+                        {new Intl.NumberFormat("ko-KR").format(
+                          listing.price_deposit
+                        )}
+                        만원
                       </div>
                       {listing.price_monthly && (
                         <div className="text-sm text-slate-600">
-                          월 {formatPrice(listing.price_monthly)}만원
+                          월{" "}
+                          {new Intl.NumberFormat("ko-KR").format(
+                            listing.price_monthly
+                          )}
+                          만원
                         </div>
                       )}
                     </div>
@@ -393,11 +430,19 @@ export default function MapSearchPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-xl text-slate-800">
-                    보증금 {formatPrice(selectedListing.price_deposit)}만원
+                    보증금{" "}
+                    {new Intl.NumberFormat("ko-KR").format(
+                      selectedListing.price_deposit
+                    )}
+                    만원
                   </div>
                   {selectedListing.price_monthly && (
                     <div className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                      월 {formatPrice(selectedListing.price_monthly)}만원
+                      월{" "}
+                      {new Intl.NumberFormat("ko-KR").format(
+                        selectedListing.price_monthly
+                      )}
+                      만원
                     </div>
                   )}
                 </div>
