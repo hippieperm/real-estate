@@ -23,101 +23,75 @@ import {
   List,
   ArrowRight,
   Map,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// 지역 데이터 (실제로는 API에서 가져올 데이터)
-const regions = [
-  {
-    id: 1,
-    name: "강남구",
-    district: "서울특별시",
-    buildingCount: 1247,
-    avgPrice: 850000,
-    trend: "+12%",
-    popular: true,
-    image: "/api/placeholder/400/200",
-    description: "강남의 핵심 비즈니스 중심지",
-    subRegions: ["역삼동", "삼성동", "청담동", "압구정동", "신사동", "논현동"],
-  },
-  {
-    id: 2,
-    name: "서초구",
-    district: "서울특별시",
-    buildingCount: 892,
-    avgPrice: 720000,
-    trend: "+8%",
-    popular: true,
-    image: "/api/placeholder/400/200",
-    description: "법조타운과 IT 중심의 프리미엄 지역",
-    subRegions: ["서초동", "방배동", "잠원동", "반포동", "내곡동"],
-  },
-  {
-    id: 3,
-    name: "송파구",
-    district: "서울특별시",
-    buildingCount: 654,
-    avgPrice: 680000,
-    trend: "+15%",
-    popular: false,
-    image: "/api/placeholder/400/200",
-    description: "잠실과 올림픽공원을 중심으로 한 신도시",
-    subRegions: ["잠실동", "문정동", "가락동", "석촌동", "방이동", "송파동"],
-  },
-  {
-    id: 4,
-    name: "마포구",
-    district: "서울특별시",
-    buildingCount: 423,
-    avgPrice: 520000,
-    trend: "+6%",
-    popular: false,
-    image: "/api/placeholder/400/200",
-    description: "홍대와 상암동을 중심으로 한 창업 허브",
-    subRegions: ["홍대", "상암동", "합정동", "성산동", "공덕동", "대흥동"],
-  },
-  {
-    id: 5,
-    name: "영등포구",
-    district: "서울특별시",
-    buildingCount: 387,
-    avgPrice: 480000,
-    trend: "+4%",
-    popular: false,
-    image: "/api/placeholder/400/200",
-    description: "여의도 금융센터와 연결된 비즈니스 지역",
-    subRegions: ["여의도", "영등포동", "당산동", "문래동", "신길동"],
-  },
-  {
-    id: 6,
-    name: "중구",
-    district: "서울특별시",
-    buildingCount: 298,
-    avgPrice: 450000,
-    trend: "+3%",
-    popular: false,
-    image: "/api/placeholder/400/200",
-    description: "서울의 심장부, 전통과 현대가 공존하는 지역",
-    subRegions: ["명동", "을지로", "회현동", "중림동", "봉래동"],
-  },
-];
+// 지역 데이터 타입 정의
+interface Region {
+  id: string;
+  name: string;
+  district: string;
+  buildingCount: number;
+  avgPrice: number;
+  avgDeposit: number;
+  recentListings: number;
+  popular: boolean;
+  trend: string;
+  description: string;
+  subRegions: string[];
+}
 
 export default function RegionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [filteredRegions, setFilteredRegions] = useState(regions);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [filteredRegions, setFilteredRegions] = useState<Region[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // 지역 데이터 로드
   useEffect(() => {
-    const filtered = regions.filter(
-      (region) =>
-        region.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        region.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        region.subRegions.some((sub) =>
-          sub.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
-    setFilteredRegions(filtered);
-  }, [searchTerm]);
+    const fetchRegions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/regions");
+        const data = await response.json();
+
+        if (response.ok) {
+          setRegions(data.regions);
+          setFilteredRegions(data.regions);
+          setError(null);
+        } else {
+          setError(data.error || "지역 데이터를 불러오는데 실패했습니다");
+        }
+      } catch (error) {
+        console.error("Error fetching regions:", error);
+        setError("네트워크 오류가 발생했습니다");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRegions();
+  }, []);
+
+  // 검색 필터링
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = regions.filter(
+        (region) =>
+          region.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          region.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          region.subRegions.some((sub) =>
+            sub.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      );
+      setFilteredRegions(filtered);
+    } else {
+      setFilteredRegions(regions);
+    }
+  }, [searchTerm, regions]);
 
   const formatPrice = (price: number) => {
     return `${(price / 10000).toFixed(0)}만원`;
@@ -208,128 +182,162 @@ export default function RegionsPage() {
             </div>
           </div>
 
-          {/* Regions Grid/List */}
-          <div
-            className={cn(
-              viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                : "space-y-4"
-            )}
-          >
-            {filteredRegions.map((region, index) => (
-              <Card
-                key={region.id}
-                className={cn(
-                  "group hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-white/50 bg-white/90 backdrop-blur-sm",
-                  viewMode === "list" && "flex flex-row"
-                )}
-                style={{ animationDelay: `${index * 100}ms` }}
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <Map className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                지역 데이터를 불러오는 중...
+              </h3>
+              <p className="text-slate-600">잠시만 기다려주세요</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <X className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                오류가 발생했습니다
+              </h3>
+              <p className="text-slate-600 mb-4">{error}</p>
+              <Button
+                onClick={() => window.location.reload()}
+                className="gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300"
               >
-                <CardHeader
+                다시 시도
+              </Button>
+            </div>
+          )}
+
+          {/* Regions Grid/List */}
+          {!loading && !error && (
+            <div
+              className={cn(
+                viewMode === "grid"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-4"
+              )}
+            >
+              {filteredRegions.map((region, index) => (
+                <Card
+                  key={region.id}
                   className={cn(
-                    "relative overflow-hidden",
-                    viewMode === "list" && "flex-1"
+                    "group hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-white/50 bg-white/90 backdrop-blur-sm",
+                    viewMode === "list" && "flex flex-row"
                   )}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm text-slate-600">
-                          {region.district}
-                        </span>
-                      </div>
-                      {region.popular && (
-                        <Badge className="bg-gradient-to-r from-orange-400 to-pink-500 text-white border-0">
-                          <Star className="h-3 w-3 mr-1" />
-                          인기
-                        </Badge>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl text-slate-800 mb-2">
-                      {region.name}
-                    </CardTitle>
-                    <CardDescription className="text-slate-600">
-                      {region.description}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-
-                <CardContent
-                  className={cn("space-y-4", viewMode === "list" && "flex-1")}
-                >
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mx-auto mb-2">
-                        <Building2 className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <p className="text-xs text-slate-600">건물수</p>
-                      <p className="text-sm font-semibold text-slate-800">
-                        {region.buildingCount.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mx-auto mb-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                      </div>
-                      <p className="text-xs text-slate-600">평균가격</p>
-                      <p className="text-sm font-semibold text-slate-800">
-                        {formatPrice(region.avgPrice)}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg mx-auto mb-2">
-                        <Users className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <p className="text-xs text-slate-600">상승률</p>
-                      <p className="text-sm font-semibold text-green-600">
-                        {region.trend}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Sub Regions */}
-                  <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">
-                      주요 동네
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {region.subRegions.slice(0, 4).map((subRegion) => (
-                        <Badge
-                          key={subRegion}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {subRegion}
-                        </Badge>
-                      ))}
-                      {region.subRegions.length > 4 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{region.subRegions.length - 4}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <Button
-                    className="w-full gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 group-hover:scale-105"
-                    onClick={() =>
-                      (window.location.href = `/list?region=${region.name}`)
-                    }
+                  <CardHeader
+                    className={cn(
+                      "relative overflow-hidden",
+                      viewMode === "list" && "flex-1"
+                    )}
                   >
-                    매물 보기
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm text-slate-600">
+                            {region.district}
+                          </span>
+                        </div>
+                        {region.popular && (
+                          <Badge className="bg-gradient-to-r from-orange-400 to-pink-500 text-white border-0">
+                            <Star className="h-3 w-3 mr-1" />
+                            인기
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-xl text-slate-800 mb-2">
+                        {region.name}
+                      </CardTitle>
+                      <CardDescription className="text-slate-600">
+                        {region.description}
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent
+                    className={cn("space-y-4", viewMode === "list" && "flex-1")}
+                  >
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mx-auto mb-2">
+                          <Building2 className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <p className="text-xs text-slate-600">건물수</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {region.buildingCount.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mx-auto mb-2">
+                          <TrendingUp className="h-4 w-4 text-green-600" />
+                        </div>
+                        <p className="text-xs text-slate-600">평균가격</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {formatPrice(region.avgPrice)}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg mx-auto mb-2">
+                          <Users className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <p className="text-xs text-slate-600">상승률</p>
+                        <p className="text-sm font-semibold text-green-600">
+                          {region.trend}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Sub Regions */}
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 mb-2">
+                        주요 동네
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {region.subRegions.slice(0, 4).map((subRegion) => (
+                          <Badge
+                            key={subRegion}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {subRegion}
+                          </Badge>
+                        ))}
+                        {region.subRegions.length > 4 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{region.subRegions.length - 4}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <Button
+                      className="w-full gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 group-hover:scale-105"
+                      onClick={() =>
+                        (window.location.href = `/list?region=${region.name}`)
+                      }
+                    >
+                      매물 보기
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Empty State */}
-          {filteredRegions.length === 0 && (
+          {!loading && !error && filteredRegions.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="h-8 w-8 text-slate-400" />
