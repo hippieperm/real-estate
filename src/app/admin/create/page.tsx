@@ -11,14 +11,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ImageUpload } from "@/components/ui/image-upload"
 import { LocationPicker } from "@/components/ui/location-picker"
 import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
-import { 
-  ArrowLeft, 
-  Save, 
+import {
+  ArrowLeft,
+  Save,
   Building2,
   MapPin,
   DollarSign,
   Square,
-  Upload
+  Upload,
+  CheckCircle,
+  Circle,
+  Sparkles,
+  Home,
+  TrendingUp,
+  Camera,
+  MapIcon
 } from "lucide-react"
 import Link from "next/link"
 
@@ -175,140 +182,194 @@ export default function CreateListingPage() {
 
     } catch (error) {
       console.error('Create error:', error)
-      showError('등록 실패', `등록에 실패했습니다: ${error.message || error}`)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      showError('등록 실패', `등록에 실패했습니다: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-40">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f1f5f9' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-6">
+      <div className="relative bg-white/90 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-20 shadow-lg shadow-slate-200/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-indigo-600/5"></div>
+        <div className="max-w-6xl mx-auto px-6 py-10 relative">
+          <div className="flex items-center gap-8">
             <Link href="/admin">
-              <Button variant="outline" size="sm" className="gap-2 border-gray-300 text-gray-700 bg-white/90 hover:bg-white hover:border-gray-400 font-medium shadow-md hover:shadow-lg transition-all duration-200">
-                <ArrowLeft className="h-4 w-4" />
-                돌아가기
+              <Button
+                variant="outline"
+                size="lg"
+                className="gap-3 border-slate-300/60 text-slate-700 bg-white/80 hover:bg-white hover:border-slate-400 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl px-6 py-3 backdrop-blur-sm"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                관리자 대시보드
               </Button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">새 매물 등록</h1>
-              <p className="text-lg text-gray-600">매물 정보를 입력하여 새로운 매물을 등록하세요</p>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
+                    새 매물 등록
+                  </h1>
+                  <p className="text-xl text-slate-600 font-medium">
+                    전문적인 매물 정보를 입력하여 새로운 매물을 등록하세요
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              실시간 저장
+            <div className="hidden lg:flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl border border-emerald-200/60 shadow-lg">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+              <span className="text-sm font-semibold text-emerald-700">실시간 자동 저장</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <form onSubmit={handleSubmit} className="space-y-10">
-          {/* Progress Indicator */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">1</div>
-                <span className="text-sm font-medium text-gray-900">기본정보</span>
-              </div>
-              <div className="w-16 h-px bg-gray-300"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">2</div>
-                <span className="text-sm font-medium text-gray-500">위치정보</span>
-              </div>
-              <div className="w-16 h-px bg-gray-300"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">3</div>
-                <span className="text-sm font-medium text-gray-500">이미지</span>
+      <div className="max-w-6xl mx-auto px-6 py-16 relative">
+        <form onSubmit={handleSubmit} className="space-y-16">
+          {/* Enhanced Progress Indicator */}
+          <div className="relative">
+            <div className="flex items-center justify-center mb-12">
+              <div className="flex items-center space-x-8 bg-white/80 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl shadow-slate-200/30 border border-slate-200/60">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-blue-500/30">
+                    <CheckCircle className="h-6 w-6" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-slate-900">기본 정보</div>
+                    <div className="text-xs text-slate-600">매물 기본 정보</div>
+                  </div>
+                </div>
+
+                <div className="w-12 h-1 bg-gradient-to-r from-blue-300 to-slate-300 rounded-full"></div>
+
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-emerald-500/30">
+                    <MapIcon className="h-6 w-6" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-slate-900">위치 정보</div>
+                    <div className="text-xs text-slate-600">주소 및 좌표</div>
+                  </div>
+                </div>
+
+                <div className="w-12 h-1 bg-gradient-to-r from-slate-300 to-orange-300 rounded-full"></div>
+
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-orange-500/30">
+                    <Camera className="h-6 w-6" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-slate-900">이미지</div>
+                    <div className="text-xs text-slate-600">사진 업로드</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* 기본 정보 */}
-          <Card className="border-0 shadow-xl bg-white/70 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-50"></div>
-            <CardHeader className="pb-6 relative">
-              <CardTitle className="flex items-center gap-4 text-2xl font-bold text-gray-900">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                  <Building2 className="h-6 w-6 text-white" />
-                </div>
-                기본 정보
-                <div className="ml-auto">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-                    <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+          <Card className="group border-0 shadow-2xl shadow-slate-200/40 bg-white/90 backdrop-blur-xl hover:shadow-3xl hover:shadow-slate-300/50 transition-all duration-500 rounded-3xl overflow-hidden hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-indigo-50/40 to-purple-50/60 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="pb-8 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-6 text-3xl font-bold text-slate-900">
+                  <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl shadow-blue-500/30 group-hover:shadow-2xl group-hover:shadow-blue-500/40 transition-all duration-300">
+                    <Building2 className="h-8 w-8 text-white" />
                   </div>
+                  <div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      기본 정보
+                    </div>
+                    <div className="text-sm text-slate-600 font-medium mt-1">
+                      매물의 기본적인 정보를 입력해주세요
+                    </div>
+                  </div>
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse delay-200"></div>
                 </div>
-              </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-8 relative">
+            <CardContent className="space-y-10 relative">
               <div className="group">
-                <Label htmlFor="title" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  매물명 
-                  <span className="text-red-500">*</span>
-                  <div className="w-1 h-1 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <Label htmlFor="title" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  매물명
+                  <span className="text-red-500 text-lg">*</span>
                 </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="예: 강남역 프리미엄 오피스"
+                  placeholder="예: 강남역 프리미엄 오피스텔"
                   required
-                  className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                  className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                 />
               </div>
 
               <div className="group">
-                <Label htmlFor="description" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                <Label htmlFor="description" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   매물 설명
-                  <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <span className="text-xs text-slate-500 font-normal">(선택사항)</span>
                 </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="매물에 대한 자세한 설명을 입력하세요"
-                  rows={4}
-                  className="border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                  placeholder="매물의 특징, 장점, 주변 환경 등에 대한 자세한 설명을 입력하세요"
+                  rows={5}
+                  className="border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-base font-medium resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="group">
-                  <Label htmlFor="property_type" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    매물 유형 
-                    <span className="text-red-500">*</span>
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <Label htmlFor="property_type" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    매물 유형
+                    <span className="text-red-500 text-lg">*</span>
                   </Label>
                   <Select onValueChange={(value) => handleInputChange('property_type', value)} required>
-                    <SelectTrigger className="h-12 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    <SelectTrigger className="h-14 border-2 border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20">
                       <SelectValue placeholder="매물 유형을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="office">🏢 사무실</SelectItem>
-                      <SelectItem value="retail">🏪 상가</SelectItem>
-                      <SelectItem value="building">🏬 통건물</SelectItem>
-                      <SelectItem value="residential">🏠 주택형</SelectItem>
+                    <SelectContent className="rounded-2xl shadow-2xl border-2 border-slate-200">
+                      <SelectItem value="office" className="text-lg font-medium py-4">🏢 사무실</SelectItem>
+                      <SelectItem value="retail" className="text-lg font-medium py-4">🏪 상가</SelectItem>
+                      <SelectItem value="building" className="text-lg font-medium py-4">🏬 통건물</SelectItem>
+                      <SelectItem value="residential" className="text-lg font-medium py-4">🏠 주택형</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="group">
-                  <Label htmlFor="status" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label htmlFor="status" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                     상태
-                    <div className="w-1 h-1 bg-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span className="text-xs text-slate-500 font-normal">(기본값: 활성)</span>
                   </Label>
                   <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                    <SelectTrigger className="h-12 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    <SelectTrigger className="h-14 border-2 border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="active">✅ 활성</SelectItem>
-                      <SelectItem value="inactive">⭕ 비활성</SelectItem>
+                    <SelectContent className="rounded-2xl shadow-2xl border-2 border-slate-200">
+                      <SelectItem value="active" className="text-lg font-medium py-4">✅ 활성</SelectItem>
+                      <SelectItem value="inactive" className="text-lg font-medium py-4">⭕ 비활성</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -317,30 +378,37 @@ export default function CreateListingPage() {
           </Card>
 
           {/* 가격 정보 */}
-          <Card className="border-0 shadow-xl bg-white/70 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-50/50 to-emerald-50/50 opacity-50"></div>
-            <CardHeader className="pb-6 relative">
-              <CardTitle className="flex items-center gap-4 text-2xl font-bold text-gray-900">
-                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                  <DollarSign className="h-6 w-6 text-white" />
-                </div>
-                가격 정보
-                <div className="ml-auto">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-green-400 rounded-full"></div>
-                    <div className="w-1 h-1 bg-green-300 rounded-full"></div>
+          <Card className="group border-0 shadow-2xl shadow-slate-200/40 bg-white/90 backdrop-blur-xl hover:shadow-3xl hover:shadow-slate-300/50 transition-all duration-500 rounded-3xl overflow-hidden hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/60 via-green-50/40 to-teal-50/60 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="pb-8 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-6 text-3xl font-bold text-slate-900">
+                  <div className="p-4 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl shadow-xl shadow-emerald-500/30 group-hover:shadow-2xl group-hover:shadow-emerald-500/40 transition-all duration-300">
+                    <TrendingUp className="h-8 w-8 text-white" />
                   </div>
+                  <div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      가격 정보
+                    </div>
+                    <div className="text-sm text-slate-600 font-medium mt-1">
+                      매물의 가격 정보를 입력해주세요
+                    </div>
+                  </div>
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse delay-200"></div>
                 </div>
-              </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-8 relative">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <CardContent className="space-y-10 relative">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="group">
-                  <Label htmlFor="price_deposit" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    💰 보증금 (만원) 
-                    <span className="text-red-500">*</span>
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <Label htmlFor="price_deposit" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    💰 보증금 (만원)
+                    <span className="text-red-500 text-lg">*</span>
                   </Label>
                   <Input
                     id="price_deposit"
@@ -349,13 +417,14 @@ export default function CreateListingPage() {
                     onChange={(e) => handleNumberInputChange('price_deposit', e.target.value)}
                     placeholder="10,000"
                     required
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="price_monthly" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label htmlFor="price_monthly" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                     📅 월세 (만원)
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span className="text-xs text-slate-500 font-normal">(선택사항)</span>
                   </Label>
                   <Input
                     id="price_monthly"
@@ -363,7 +432,7 @@ export default function CreateListingPage() {
                     value={formData.price_monthly ? formatNumber(formData.price_monthly) : ''}
                     onChange={(e) => handleNumberInputChange('price_monthly', e.target.value)}
                     placeholder="300"
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
               </div>
@@ -371,30 +440,37 @@ export default function CreateListingPage() {
           </Card>
 
           {/* 면적 및 층수 */}
-          <Card className="border-0 shadow-xl bg-white/70 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-pink-50/50 opacity-50"></div>
-            <CardHeader className="pb-6 relative">
-              <CardTitle className="flex items-center gap-4 text-2xl font-bold text-gray-900">
-                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg">
-                  <Square className="h-6 w-6 text-white" />
-                </div>
-                면적 및 층수
-                <div className="ml-auto">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
-                    <div className="w-1 h-1 bg-purple-300 rounded-full"></div>
+          <Card className="group border-0 shadow-2xl shadow-slate-200/40 bg-white/90 backdrop-blur-xl hover:shadow-3xl hover:shadow-slate-300/50 transition-all duration-500 rounded-3xl overflow-hidden hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50/60 via-violet-50/40 to-pink-50/60 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="pb-8 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-6 text-3xl font-bold text-slate-900">
+                  <div className="p-4 bg-gradient-to-r from-purple-600 to-violet-600 rounded-2xl shadow-xl shadow-purple-500/30 group-hover:shadow-2xl group-hover:shadow-purple-500/40 transition-all duration-300">
+                    <Square className="h-8 w-8 text-white" />
                   </div>
+                  <div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      면적 및 층수
+                    </div>
+                    <div className="text-sm text-slate-600 font-medium mt-1">
+                      매물의 면적과 층수 정보를 입력해주세요
+                    </div>
+                  </div>
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse delay-200"></div>
                 </div>
-              </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-8 relative">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <CardContent className="space-y-10 relative">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <div className="group">
-                  <Label htmlFor="exclusive_m2" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    📐 전용면적 (㎡) 
-                    <span className="text-red-500">*</span>
-                    <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <Label htmlFor="exclusive_m2" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    📐 전용면적 (㎡)
+                    <span className="text-red-500 text-lg">*</span>
                   </Label>
                   <Input
                     id="exclusive_m2"
@@ -403,14 +479,14 @@ export default function CreateListingPage() {
                     onChange={(e) => handleNumberInputChange('exclusive_m2', e.target.value)}
                     placeholder="165.3"
                     required
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="floor" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    🏢 해당 층 
-                    <span className="text-red-500">*</span>
-                    <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <Label htmlFor="floor" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    🏢 해당 층
+                    <span className="text-red-500 text-lg">*</span>
                   </Label>
                   <Input
                     id="floor"
@@ -419,13 +495,14 @@ export default function CreateListingPage() {
                     onChange={(e) => handleNumberInputChange('floor', e.target.value)}
                     placeholder="15"
                     required
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="building_floor" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label htmlFor="building_floor" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     🏗️ 건물 총 층수
-                    <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span className="text-xs text-slate-500 font-normal">(선택사항)</span>
                   </Label>
                   <Input
                     id="building_floor"
@@ -433,7 +510,7 @@ export default function CreateListingPage() {
                     value={formData.building_floor ? formatNumber(formData.building_floor) : ''}
                     onChange={(e) => handleNumberInputChange('building_floor', e.target.value)}
                     placeholder="20"
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
               </div>
@@ -441,138 +518,184 @@ export default function CreateListingPage() {
           </Card>
 
           {/* 위치 정보 */}
-          <Card className="border-0 shadow-xl bg-white/70 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-50/50 to-orange-50/50 opacity-50"></div>
-            <CardHeader className="pb-6 relative">
-              <CardTitle className="flex items-center gap-4 text-2xl font-bold text-gray-900">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg">
-                  <MapPin className="h-6 w-6 text-white" />
-                </div>
-                위치 정보
-                <div className="ml-auto">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-red-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-red-400 rounded-full"></div>
-                    <div className="w-1 h-1 bg-red-300 rounded-full"></div>
+          <Card className="group border-0 shadow-2xl shadow-slate-200/40 bg-white/90 backdrop-blur-xl hover:shadow-3xl hover:shadow-slate-300/50 transition-all duration-500 rounded-3xl overflow-hidden hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-50/60 via-red-50/40 to-orange-50/60 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="pb-8 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-6 text-3xl font-bold text-slate-900">
+                  <div className="p-4 bg-gradient-to-r from-rose-600 to-red-600 rounded-2xl shadow-xl shadow-rose-500/30 group-hover:shadow-2xl group-hover:shadow-rose-500/40 transition-all duration-300">
+                    <MapPin className="h-8 w-8 text-white" />
                   </div>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8 relative">
-              <div className="group">
-                <Label className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  🗺️ 위치 선택 
-                  <span className="text-red-500">*</span>
-                  <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </Label>
-                <LocationPicker
-                  onLocationSelect={handleLocationSelect}
-                  initialAddress={formData.address_road}
-                />
-                {formData.address_road && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-xl">
-                    <div className="text-sm font-medium text-blue-900">
-                      📍 {formData.address_road}
+                  <div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      위치 정보
                     </div>
-                    {formData.address_jibun && (
-                      <div className="text-xs text-blue-700 mt-1">
-                        지번: {formData.address_jibun}
+                    <div className="text-sm text-slate-600 font-medium mt-1">
+                      매물의 정확한 위치를 선택해주세요
+                    </div>
+                  </div>
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-rose-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-rose-300 rounded-full animate-pulse delay-200"></div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-10 relative">
+              <div className="group">
+                <Label className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
+                  🗺️ 위치 선택
+                  <span className="text-red-500 text-lg">*</span>
+                </Label>
+                <div className="border-2 border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 focus-within:border-rose-500 focus-within:ring-4 focus-within:ring-rose-500/20">
+                  <LocationPicker
+                    onLocationSelect={handleLocationSelect}
+                    initialAddress={formData.address_road}
+                  />
+                </div>
+                {formData.address_road && (
+                  <div className="mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200/60 shadow-lg">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-blue-500 rounded-xl">
+                        <MapPin className="h-5 w-5 text-white" />
                       </div>
-                    )}
-                    <div className="text-xs text-blue-600 mt-1">
-                      좌표: {formData.latitude}, {formData.longitude}
+                      <div className="flex-1">
+                        <div className="text-lg font-bold text-blue-900 mb-2">
+                          📍 {formData.address_road}
+                        </div>
+                        {formData.address_jibun && (
+                          <div className="text-sm text-blue-700 mb-2">
+                            지번: {formData.address_jibun}
+                          </div>
+                        )}
+                        <div className="text-xs text-blue-600 bg-blue-100/60 px-3 py-1 rounded-lg inline-block">
+                          좌표: {formData.latitude}, {formData.longitude}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
               <div className="group">
-                <Label htmlFor="address_detail" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                <Label htmlFor="address_detail" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
                   🏢 상세 주소 (동/호수)
-                  <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <span className="text-xs text-slate-500 font-normal">(선택사항)</span>
                 </Label>
                 <Input
                   id="address_detail"
                   value={formData.address_detail}
                   onChange={(e) => handleInputChange('address_detail', e.target.value)}
                   placeholder="15층 1501호"
-                  className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                  className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* 이미지 업로드 */}
-          <Card className="border-0 shadow-xl bg-white/70 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-50/50 to-yellow-50/50 opacity-50"></div>
-            <CardHeader className="pb-6 relative">
-              <CardTitle className="flex items-center gap-4 text-2xl font-bold text-gray-900">
-                <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg">
-                  <Upload className="h-6 w-6 text-white" />
-                </div>
-                이미지 업로드
-                <div className="ml-auto">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
-                    <div className="w-1 h-1 bg-orange-300 rounded-full"></div>
+          <Card className="group border-0 shadow-2xl shadow-slate-200/40 bg-white/90 backdrop-blur-xl hover:shadow-3xl hover:shadow-slate-300/50 transition-all duration-500 rounded-3xl overflow-hidden hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-50/60 via-amber-50/40 to-yellow-50/60 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <CardHeader className="pb-8 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-6 text-3xl font-bold text-slate-900">
+                  <div className="p-4 bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl shadow-xl shadow-orange-500/30 group-hover:shadow-2xl group-hover:shadow-orange-500/40 transition-all duration-300">
+                    <Camera className="h-8 w-8 text-white" />
                   </div>
+                  <div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      이미지 업로드
+                    </div>
+                    <div className="text-sm text-slate-600 font-medium mt-1">
+                      매물의 사진을 업로드해주세요 (최대 10장)
+                    </div>
+                  </div>
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-orange-300 rounded-full animate-pulse delay-200"></div>
                 </div>
-              </CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="relative">
-              <ImageUpload
-                value={uploadedImages}
-                onChange={handleImageUpload}
-                onRemove={handleImageRemove}
-                maxFiles={10}
-              />
+              <div className="border-2 border-slate-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/20">
+                <ImageUpload
+                  value={uploadedImages}
+                  onChange={handleImageUpload}
+                  onRemove={handleImageRemove}
+                  maxFiles={10}
+                />
+              </div>
               {uploadingImages && (
-                <div className="mt-6 flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-xl">
-                  <div className="w-5 h-5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
-                  <span className="text-sm text-blue-700 font-medium">이미지 업로드 중...</span>
+                <div className="mt-8 flex items-center justify-center gap-4 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl border-2 border-orange-200/60 shadow-lg">
+                  <div className="w-6 h-6 border-3 border-orange-300 border-t-orange-600 rounded-full animate-spin"></div>
+                  <span className="text-lg text-orange-700 font-semibold">이미지 업로드 중...</span>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* 제출 버튼 */}
-          <div className="flex justify-between items-center pt-12">
-            <div className="text-sm text-gray-500">
-              * 표시된 필드는 필수 입력 사항입니다
-            </div>
-            <div className="flex gap-4">
-              <Link href="/admin">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="h-12 px-8 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
-                >
-                  취소
-                </Button>
-              </Link>
-              <Button
-                type="submit"
-                disabled={loading || uploadingImages}
-                className="h-12 px-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>{uploadingImages ? "이미지 업로드 중..." : "등록 중..."}</span>
+          <div className="relative pt-16">
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-slate-200/30 border border-slate-200/60">
+              <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-5 w-5" />
-                    <span>매물 등록</span>
+                  <div>
+                    <div className="text-lg font-bold text-slate-800">실시간 자동 저장</div>
+                    <div className="text-sm text-slate-600">입력한 정보가 자동으로 저장됩니다</div>
                   </div>
-                )}
-              </Button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                  <Link href="/admin" className="w-full lg:w-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full lg:w-auto h-14 px-8 bg-white/80 border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                    >
+                      <ArrowLeft className="h-5 w-5 mr-2" />
+                      취소
+                    </Button>
+                  </Link>
+                  <Button
+                    type="submit"
+                    disabled={loading || uploadingImages}
+                    className="w-full lg:w-auto h-14 px-12 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white rounded-2xl font-bold shadow-2xl hover:shadow-3xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 transform hover:scale-105 text-lg"
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>{uploadingImages ? "이미지 업로드 중..." : "등록 중..."}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Save className="h-6 w-6" />
+                        <span>매물 등록하기</span>
+                        <Sparkles className="h-5 w-5" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-slate-200/60">
+                <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                  <div className="w-1 h-1 bg-red-500 rounded-full"></div>
+                  <span className="font-medium">* 표시된 필드는 필수 입력 사항입니다</span>
+                </div>
+              </div>
             </div>
           </div>
         </form>
       </div>
-      
+
       <NotificationModal
         isOpen={modal.isOpen}
         onClose={closeModal}
