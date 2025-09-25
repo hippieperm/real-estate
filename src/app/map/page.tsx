@@ -495,19 +495,13 @@ export default function MapSearchPage() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-lg text-slate-800">
-                        보증금{" "}
-                        {new Intl.NumberFormat("ko-KR").format(
-                          listing.price_deposit
-                        )}
-                        만원
+                        보증금 {formatPrice(listing.price_deposit)}
+                        {listing.price_deposit < 10000 ? '만원' : ''}
                       </div>
                       {listing.price_monthly && (
                         <div className="text-sm text-slate-600">
-                          월{" "}
-                          {new Intl.NumberFormat("ko-KR").format(
-                            listing.price_monthly
-                          )}
-                          만원
+                          월 {formatPrice(listing.price_monthly)}
+                          {listing.price_monthly < 10000 ? '만원' : ''}
                         </div>
                       )}
                     </div>
@@ -756,19 +750,13 @@ export default function MapSearchPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-xl text-slate-800">
-                    보증금{" "}
-                    {new Intl.NumberFormat("ko-KR").format(
-                      selectedListing.price_deposit
-                    )}
-                    만원
+                    보증금 {formatPrice(selectedListing.price_deposit)}
+                    {selectedListing.price_deposit < 10000 ? '만원' : ''}
                   </div>
                   {selectedListing.price_monthly && (
                     <div className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                      월{" "}
-                      {new Intl.NumberFormat("ko-KR").format(
-                        selectedListing.price_monthly
-                      )}
-                      만원
+                      월 {formatPrice(selectedListing.price_monthly)}
+                      {selectedListing.price_monthly < 10000 ? '만원' : ''}
                     </div>
                   )}
                 </div>
