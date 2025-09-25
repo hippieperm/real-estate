@@ -36,11 +36,11 @@ const notificationStyles = {
   },
   warning: {
     icon: AlertTriangle,
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    titleColor: 'text-yellow-800',
-    border: 'border-yellow-200',
-    bg: 'bg-yellow-50'
+    iconBg: 'bg-gradient-to-r from-red-100 to-orange-100',
+    iconColor: 'text-red-600',
+    titleColor: 'text-red-800',
+    border: 'border-red-300',
+    bg: 'bg-gradient-to-br from-red-50 to-orange-50'
   },
   info: {
     icon: Info,
@@ -76,14 +76,14 @@ export function NotificationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-        <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
-        
-        <div className="relative transform overflow-hidden rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+
+        <div className={`relative transform overflow-hidden rounded-3xl px-8 pb-8 pt-8 text-left shadow-2xl transition-all w-full max-w-md ${style.bg} ${style.border} border-2`}>
           {/* Close button */}
           <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
             <button
@@ -96,19 +96,19 @@ export function NotificationModal({
             </button>
           </div>
 
-          <div className="sm:flex sm:items-start">
+          <div className="flex flex-col items-center text-center">
             {/* Icon */}
-            <div className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${style.iconBg} sm:mx-0 sm:h-10 sm:w-10`}>
-              <Icon className={`h-6 w-6 ${style.iconColor}`} />
+            <div className={`flex h-20 w-20 items-center justify-center rounded-full ${style.iconBg} mb-6 shadow-lg`}>
+              <Icon className={`h-10 w-10 ${style.iconColor} animate-pulse`} />
             </div>
 
             {/* Content */}
-            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-              <h3 className={`text-base font-semibold leading-6 ${style.titleColor}`}>
+            <div className="w-full">
+              <h3 className={`text-2xl font-bold leading-6 ${style.titleColor} mb-4`}>
                 {title}
               </h3>
-              <div className="mt-2">
-                <p className="text-sm text-gray-500">
+              <div className="mb-6">
+                <p className="text-lg text-gray-700 font-medium leading-relaxed">
                   {message}
                 </p>
               </div>
@@ -116,31 +116,29 @@ export function NotificationModal({
           </div>
 
           {/* Buttons */}
-          <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-            <Button
-              onClick={handleConfirm}
-              className={`inline-flex w-full justify-center rounded-xl px-3 py-2 text-sm font-semibold shadow-sm sm:ml-3 sm:w-auto transition-all duration-200 ${
-                type === 'success' 
-                  ? 'bg-green-600 hover:bg-green-500 text-white' 
-                  : type === 'error'
-                  ? 'bg-red-600 hover:bg-red-500 text-white'
-                  : type === 'warning'
-                  ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
-                  : 'bg-blue-600 hover:bg-blue-500 text-white'
-              }`}
-            >
-              {confirmText}
-            </Button>
-
+          <div className="flex gap-4 w-full">
             {onConfirm && (
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="mt-3 inline-flex w-full justify-center rounded-xl px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-all duration-200"
+                className="flex-1 h-14 text-lg font-bold text-gray-700 hover:text-gray-800 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 rounded-2xl transition-all duration-300 hover:scale-105"
               >
                 {cancelText}
               </Button>
             )}
+            <Button
+              onClick={handleConfirm}
+              className={`flex-1 h-14 text-lg font-bold rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg ${type === 'success'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
+                : type === 'error'
+                  ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white'
+                  : type === 'warning'
+                    ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white'
+                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+                }`}
+            >
+              {confirmText}
+            </Button>
           </div>
         </div>
       </div>
@@ -182,16 +180,16 @@ export function useNotificationModal() {
     setModal(prev => ({ ...prev, isOpen: false }))
   }
 
-  const showSuccess = (title: string, message: string) => 
+  const showSuccess = (title: string, message: string) =>
     showNotification('success', title, message)
-  
-  const showError = (title: string, message: string) => 
+
+  const showError = (title: string, message: string) =>
     showNotification('error', title, message)
-  
-  const showWarning = (title: string, message: string, onConfirm?: () => void) => 
+
+  const showWarning = (title: string, message: string, onConfirm?: () => void) =>
     showNotification('warning', title, message, onConfirm)
-  
-  const showInfo = (title: string, message: string) => 
+
+  const showInfo = (title: string, message: string) =>
     showNotification('info', title, message)
 
   return {
