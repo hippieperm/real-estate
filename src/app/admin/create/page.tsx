@@ -43,10 +43,24 @@ export default function CreateListingPage() {
     status: 'active'
   })
 
+  const formatNumber = (value: string) => {
+    const numericValue = value.replace(/,/g, '')
+    if (numericValue === '' || isNaN(Number(numericValue))) return value
+    return Number(numericValue).toLocaleString('ko-KR')
+  }
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }))
+  }
+
+  const handleNumberInputChange = (field: string, value: string) => {
+    const numericValue = value.replace(/,/g, '')
+    setFormData(prev => ({
+      ...prev,
+      [field]: numericValue
     }))
   }
 
@@ -303,10 +317,10 @@ export default function CreateListingPage() {
                   </Label>
                   <Input
                     id="price_deposit"
-                    type="number"
-                    value={formData.price_deposit}
-                    onChange={(e) => handleInputChange('price_deposit', e.target.value)}
-                    placeholder="10000"
+                    type="text"
+                    value={formatNumber(formData.price_deposit)}
+                    onChange={(e) => handleNumberInputChange('price_deposit', e.target.value)}
+                    placeholder="10,000"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
@@ -318,9 +332,9 @@ export default function CreateListingPage() {
                   </Label>
                   <Input
                     id="price_monthly"
-                    type="number"
-                    value={formData.price_monthly}
-                    onChange={(e) => handleInputChange('price_monthly', e.target.value)}
+                    type="text"
+                    value={formData.price_monthly ? formatNumber(formData.price_monthly) : ''}
+                    onChange={(e) => handleNumberInputChange('price_monthly', e.target.value)}
                     placeholder="300"
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
@@ -357,10 +371,9 @@ export default function CreateListingPage() {
                   </Label>
                   <Input
                     id="exclusive_m2"
-                    type="number"
-                    step="0.01"
-                    value={formData.exclusive_m2}
-                    onChange={(e) => handleInputChange('exclusive_m2', e.target.value)}
+                    type="text"
+                    value={formData.exclusive_m2 ? formatNumber(formData.exclusive_m2) : ''}
+                    onChange={(e) => handleNumberInputChange('exclusive_m2', e.target.value)}
                     placeholder="165.3"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
@@ -374,9 +387,9 @@ export default function CreateListingPage() {
                   </Label>
                   <Input
                     id="floor"
-                    type="number"
-                    value={formData.floor}
-                    onChange={(e) => handleInputChange('floor', e.target.value)}
+                    type="text"
+                    value={formData.floor ? formatNumber(formData.floor) : ''}
+                    onChange={(e) => handleNumberInputChange('floor', e.target.value)}
                     placeholder="15"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
@@ -389,9 +402,9 @@ export default function CreateListingPage() {
                   </Label>
                   <Input
                     id="building_floor"
-                    type="number"
-                    value={formData.building_floor}
-                    onChange={(e) => handleInputChange('building_floor', e.target.value)}
+                    type="text"
+                    value={formData.building_floor ? formatNumber(formData.building_floor) : ''}
+                    onChange={(e) => handleNumberInputChange('building_floor', e.target.value)}
                     placeholder="20"
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
