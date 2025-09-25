@@ -513,7 +513,7 @@ export default function ListSearchPage() {
                   <Button
                     variant="outline"
                     onClick={resetFilters}
-                    className="gap-2 rounded-xl"
+                    className="gap-2 rounded-xl bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 transition-all duration-200"
                   >
                     <X className="h-4 w-4" />
                     필터 초기화
