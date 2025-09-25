@@ -378,10 +378,40 @@ export default function ListSearchPage() {
                       {propertyTypes.map((type) => {
                         const Icon = type.icon;
                         const isSelected = filters.property_type.includes(type.value);
+                        const getButtonStyles = () => {
+                          if (isSelected) {
+                            switch (type.color) {
+                              case "blue":
+                                return "bg-blue-100 border-blue-300 text-blue-800 shadow-md";
+                              case "green":
+                                return "bg-green-100 border-green-300 text-green-800 shadow-md";
+                              case "purple":
+                                return "bg-purple-100 border-purple-300 text-purple-800 shadow-md";
+                              case "orange":
+                                return "bg-orange-100 border-orange-300 text-orange-800 shadow-md";
+                              default:
+                                return "bg-slate-100 border-slate-300 text-slate-800 shadow-md";
+                            }
+                          } else {
+                            switch (type.color) {
+                              case "blue":
+                                return "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300";
+                              case "green":
+                                return "bg-white border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300";
+                              case "purple":
+                                return "bg-white border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300";
+                              case "orange":
+                                return "bg-white border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300";
+                              default:
+                                return "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300";
+                            }
+                          }
+                        };
+
                         return (
                           <Button
                             key={type.value}
-                            variant={isSelected ? "default" : "outline"}
+                            variant="outline"
                             onClick={() => {
                               if (isSelected) {
                                 setFilters({
@@ -395,7 +425,7 @@ export default function ListSearchPage() {
                                 });
                               }
                             }}
-                            className="h-12 justify-start gap-3 rounded-xl transition-all duration-200"
+                            className={`h-12 justify-start gap-3 rounded-xl transition-all duration-200 ${getButtonStyles()}`}
                           >
                             <Icon className="h-4 w-4" />
                             {type.label}
