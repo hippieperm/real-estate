@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
       floors_total,
       address_road,
       address_jibun,
-      address_detail,
       latitude,
       longitude,
       status = 'active'
@@ -50,8 +49,8 @@ export async function POST(request: NextRequest) {
       floors_total: floors_total ? Number(floors_total) : null,
       address_road,
       address_jibun: address_jibun || null,
-      address_detail: address_detail || null,
       status,
+      location: `POINT(${longitude} ${latitude})`, // PostGIS POINT 형식으로 설정
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -67,24 +66,14 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Database error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: '매물 생성에 실패했습니다', details: error.message },
+        { error: '매물 생성에 실패했습니다', details: error.message, fullError: error },
         { status: 500 }
       )
     }
 
-    // location 컬럼을 별도로 업데이트 (PostGIS)
-    if (listing && latitude && longitude) {
-      const { error: updateError } = await (supabase as any).rpc('update_listing_location', {
-        listing_id: (listing as any).id,
-        lat: Number(latitude),
-        lng: Number(longitude)
-      })
-
-      if (updateError) {
-        console.error('Location update error:', updateError)
-      }
-    }
+    // location은 이미 insertData에 포함되어 있으므로 별도 업데이트 불필요
 
     // Materialized view 새로고침
     try {

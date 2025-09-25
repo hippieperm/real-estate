@@ -162,7 +162,8 @@ export default function CreateListingPage() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || '매물 등록에 실패했습니다')
+        console.error('API Error:', error)
+        throw new Error(error.details || error.error || '매물 등록에 실패했습니다')
       }
 
       const { listing } = await response.json()
