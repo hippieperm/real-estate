@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { LocationPicker } from "@/components/ui/location-picker"
+import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
 import { 
   ArrowLeft, 
   Save, 
@@ -26,6 +27,7 @@ export default function EditListingPage() {
   const router = useRouter()
   const params = useParams()
   const listingId = params.id as string
+  const { modal, closeModal, showSuccess, showError } = useNotificationModal()
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -72,7 +74,7 @@ export default function EditListingPage() {
           price_monthly: listing.price_monthly?.toString() || '',
           exclusive_m2: listing.exclusive_m2?.toString() || '',
           floor: listing.floor?.toString() || '',
-          building_floor: listing.building_floor?.toString() || '',
+          building_floor: listing.floors_total?.toString() || '',
           address_road: listing.address_road || '',
           address_jibun: listing.address_jibun || '',
           address_detail: listing.address_detail || '',
@@ -81,12 +83,12 @@ export default function EditListingPage() {
           status: listing.status || 'active'
         })
       } else {
-        alert('매물을 찾을 수 없습니다.')
+        showError('오류', '매물을 찾을 수 없습니다.')
         router.push('/admin')
       }
     } catch (error) {
       console.error('Fetch error:', error)
-      alert('매물 정보를 불러오는 중 오류가 발생했습니다.')
+      showError('오류', '매물 정보를 불러오는 중 오류가 발생했습니다.')
       router.push('/admin')
     } finally {
       setLoading(false)
@@ -144,6 +146,14 @@ export default function EditListingPage() {
     setSaving(true)
 
     try {
+      // 콤마 제거 후 숫자 변환
+      const cleanPrice = (value: string) => {
+        if (!value) return null
+        const cleaned = value.replace(/,/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+
       const response = await fetch(`/api/listings/${listingId}`, {
         method: 'PUT',
         headers: {
@@ -151,26 +161,26 @@ export default function EditListingPage() {
         },
         body: JSON.stringify({
           ...formData,
-          price_deposit: Number(formData.price_deposit),
-          price_monthly: formData.price_monthly ? Number(formData.price_monthly) : null,
-          exclusive_m2: Number(formData.exclusive_m2),
-          floor: Number(formData.floor),
-          building_floor: formData.building_floor ? Number(formData.building_floor) : null,
+          price_deposit: cleanPrice(formData.price_deposit),
+          price_monthly: cleanPrice(formData.price_monthly),
+          exclusive_m2: cleanPrice(formData.exclusive_m2),
+          floor: cleanPrice(formData.floor),
+          floors_total: cleanPrice(formData.building_floor),
           latitude: formData.latitude ? Number(formData.latitude) : null,
           longitude: formData.longitude ? Number(formData.longitude) : null,
         })
       })
 
       if (response.ok) {
-        alert('매물이 성공적으로 수정되었습니다!')
+        showSuccess('성공', '매물이 성공적으로 수정되었습니다!')
         router.push('/admin')
       } else {
         const error = await response.json()
-        alert(`수정에 실패했습니다: ${error.message}`)
+        showError('수정 실패', `수정에 실패했습니다: ${error.error || error.message}`)
       }
     } catch (error) {
       console.error('Update error:', error)
-      alert('수정 중 오류가 발생했습니다.')
+      showError('오류', '수정 중 오류가 발생했습니다.')
     } finally {
       setSaving(false)
     }
@@ -554,7 +564,7 @@ export default function EditListingPage() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  className="h-12 px-8 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                  className="h-12 px-8 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
                 >
                   취소
                 </Button>
@@ -580,6 +590,15 @@ export default function EditListingPage() {
           </div>
         </form>
       </div>
+      
+      <NotificationModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   )
 }
