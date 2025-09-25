@@ -17,8 +17,10 @@ import {
 } from "lucide-react"
 import { formatPrice, formatArea } from "@/lib/utils"
 import Link from "next/link"
+import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
 
 export default function AdminPage() {
+  const { modal, closeModal, showSuccess, showError, showWarning } = useNotificationModal()
   const [listings, setListings] = useState<any[]>([])
   const [filteredListings, setFilteredListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,23 +74,31 @@ export default function AdminPage() {
     setFilteredListings(filtered)
   }
 
-  const deleteListing = async (id: string) => {
-    if (!confirm('정말로 이 매물을 삭제하시겠습니까?')) return
+  const handleDeleteClick = (id: string) => {
+    showWarning(
+      '매물 삭제',
+      '정말로 이 매물을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
+      () => deleteListing(id)
+    )
+  }
 
+  const deleteListing = async (id: string) => {
+    closeModal()
+    
     try {
       const response = await fetch(`/api/listings/${id}`, {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        alert('매물이 삭제되었습니다.')
+        showSuccess('성공', '매물이 삭제되었습니다.')
         fetchListings()
       } else {
-        alert('삭제에 실패했습니다.')
+        showError('오류', '삭제에 실패했습니다.')
       }
     } catch (error) {
       console.error('Delete error:', error)
-      alert('삭제 중 오류가 발생했습니다.')
+      showError('오류', '삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -261,7 +271,7 @@ export default function AdminPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => deleteListing(listing.id)}
+                    onClick={() => handleDeleteClick(listing.id)}
                     className="flex-1 gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -287,6 +297,15 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+      
+      <NotificationModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   )
 }
