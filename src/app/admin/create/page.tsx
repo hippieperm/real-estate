@@ -658,7 +658,7 @@ export default function CreateListingPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full lg:w-auto h-14 px-8 bg-white/80 border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                      className="w-full lg:w-auto h-14 px-8 bg-white/80 border-2 border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-800 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
                     >
                       <ArrowLeft className="h-5 w-5 mr-2" />
                       취소
