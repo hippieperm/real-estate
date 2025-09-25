@@ -266,16 +266,24 @@ export default function ListSearchPage() {
 
                 {/* Quick Filters */}
                 <div className="flex flex-wrap gap-2">
-                  {quickFilters.map((filter) => (
-                    <Button
-                      key={filter.value}
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full border-slate-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
-                    >
-                      {filter.label}
-                    </Button>
-                  ))}
+                  {quickFilters.map((filter, index) => {
+                    const colors = [
+                      "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200",
+                      "bg-green-100 border-green-300 text-green-700 hover:bg-green-200", 
+                      "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200",
+                      "bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200"
+                    ];
+                    return (
+                      <Button
+                        key={filter.value}
+                        variant="outline"
+                        size="sm"
+                        className={`rounded-full transition-all duration-200 ${colors[index % colors.length]}`}
+                      >
+                        {filter.label}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
