@@ -450,7 +450,17 @@ export default function ListSearchPage() {
                         <DollarSign className="h-5 w-5 text-green-600" />
                         보증금 (만원)
                       </h3>
-                      <div className="px-3">
+                      <div className="px-3 relative">
+                        {/* Range Display Tooltip */}
+                        <div className="flex justify-center mb-2">
+                          <div className="bg-slate-800 text-white px-3 py-1 rounded-lg text-sm font-medium shadow-lg">
+                            {depositRange[0] === 0 && depositRange[1] === 100000 ? (
+                              "전체"
+                            ) : (
+                              `${formatPrice(depositRange[0])}${depositRange[0] < 10000 ? '만' : ''} ~ ${formatPrice(depositRange[1])}${depositRange[1] < 10000 ? '만' : ''}`
+                            )}
+                          </div>
+                        </div>
                         <Slider
                           value={depositRange}
                           onValueChange={setDepositRange}
@@ -458,9 +468,11 @@ export default function ListSearchPage() {
                           step={1000}
                           className="mb-4"
                         />
-                        <div className="flex justify-between text-sm text-slate-600">
-                          <span>{formatPrice(depositRange[0])}{depositRange[0] < 10000 ? '만원' : ''}</span>
-                          <span>{formatPrice(depositRange[1])}{depositRange[1] < 10000 ? '만원' : ''}</span>
+                        <div className="flex justify-between text-sm text-slate-500">
+                          <span>최소</span>
+                          <span>5천만</span>
+                          <span>2.5억</span>
+                          <span>최대</span>
                         </div>
                       </div>
                     </div>
@@ -470,7 +482,17 @@ export default function ListSearchPage() {
                         <TrendingUp className="h-5 w-5 text-blue-600" />
                         월세 (만원)
                       </h3>
-                      <div className="px-3">
+                      <div className="px-3 relative">
+                        {/* Range Display Tooltip */}
+                        <div className="flex justify-center mb-2">
+                          <div className="bg-slate-800 text-white px-3 py-1 rounded-lg text-sm font-medium shadow-lg">
+                            {monthlyRange[0] === 0 && monthlyRange[1] === 10000 ? (
+                              "전체"
+                            ) : (
+                              `${formatPrice(monthlyRange[0])}${monthlyRange[0] < 10000 ? '만' : ''} ~ ${formatPrice(monthlyRange[1])}${monthlyRange[1] < 10000 ? '만' : ''}`
+                            )}
+                          </div>
+                        </div>
                         <Slider
                           value={monthlyRange}
                           onValueChange={setMonthlyRange}
@@ -478,9 +500,11 @@ export default function ListSearchPage() {
                           step={50}
                           className="mb-4"
                         />
-                        <div className="flex justify-between text-sm text-slate-600">
-                          <span>{formatPrice(monthlyRange[0])}{monthlyRange[0] < 10000 ? '만원' : ''}</span>
-                          <span>{formatPrice(monthlyRange[1])}{monthlyRange[1] < 10000 ? '만원' : ''}</span>
+                        <div className="flex justify-between text-sm text-slate-500">
+                          <span>최소</span>
+                          <span>35만</span>
+                          <span>150만</span>
+                          <span>최대</span>
                         </div>
                       </div>
                     </div>
