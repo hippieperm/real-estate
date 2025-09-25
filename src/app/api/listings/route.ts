@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerComponentClient()
+    const supabase = createAdminClient()
     const body = await request.json()
 
     const {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       price_monthly,
       exclusive_m2,
       floor,
-      building_floor,
+      floors_total,
       address_road,
       address_jibun,
       address_detail,
@@ -24,34 +24,35 @@ export async function POST(request: NextRequest) {
     } = body
 
     // 필수 필드 검증
-    if (!title || !property_type || !price_deposit || !exclusive_m2 || !floor || !address_road) {
+    if (!title || !property_type || price_deposit === null || price_deposit === undefined || !exclusive_m2 || floor === null || floor === undefined || !address_road || !latitude || !longitude) {
       return NextResponse.json(
         { error: '필수 필드가 누락되었습니다' },
         { status: 400 }
       )
     }
 
-    // pyeong 계산 (㎡ / 3.305785)
-    const pyeong_exclusive = exclusive_m2 / 3.305785
+    // Generate unique code
+    const code = `L${Date.now()}`
+    
+    // Create location point
+    const locationPoint = `POINT(${longitude} ${latitude})`
 
     // 매물 생성
     const { data: listing, error } = await supabase
       .from('listings')
       .insert({
+        code,
         title,
         description,
         property_type,
         price_deposit,
         price_monthly,
         exclusive_m2,
-        pyeong_exclusive,
         floor,
-        building_floor,
+        floors_total,
         address_road,
         address_jibun,
-        address_detail,
-        latitude,
-        longitude,
+        location: locationPoint,
         status,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
