@@ -41,6 +41,8 @@ export default function LoginPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const [errorType, setErrorType] = useState<"error" | "warning" | "info">("error");
 
   const {
     register,
@@ -73,11 +75,36 @@ export default function LoginPage() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Login error:", error);
+      
       if (error instanceof Error) {
-        setErrorMessage(error.message);
+        // 특정 오류 메시지 처리
+        if (error.message.includes("Invalid login credentials") || error.message.includes("invalid_credentials")) {
+          setErrorTitle("로그인 정보가 올바르지 않습니다");
+          setErrorMessage("이메일 또는 비밀번호를 확인해주세요. 계정이 없으시다면 회원가입을 진행해주세요.");
+          setErrorType("warning");
+        } else if (error.message.includes("Email not confirmed") || error.message.includes("email_not_confirmed")) {
+          setErrorTitle("이메일 인증 필요");
+          setErrorMessage("회원가입 시 발송된 인증 이메일을 확인하고 계정을 활성화해주세요.");
+          setErrorType("info");
+        } else if (error.message.includes("Too many requests") || error.message.includes("rate_limit")) {
+          setErrorTitle("로그인 시도 초과");
+          setErrorMessage("너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.");
+          setErrorType("warning");
+        } else if (error.message.includes("Network") || error.message.includes("network")) {
+          setErrorTitle("네트워크 연결 오류");
+          setErrorMessage("인터넷 연결을 확인하고 다시 시도해주세요.");
+          setErrorType("error");
+        } else {
+          setErrorTitle("로그인 오류");
+          setErrorMessage(error.message);
+          setErrorType("error");
+        }
       } else {
-        setErrorMessage("로그인에 실패했습니다. 다시 시도해주세요.");
+        setErrorTitle("예상치 못한 오류");
+        setErrorMessage("알 수 없는 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        setErrorType("error");
       }
+      
       setShowErrorModal(true);
     } finally {
       setIsLoading(false);
@@ -347,11 +374,12 @@ export default function LoginPage() {
       <ErrorModal
         isOpen={showErrorModal}
         onClose={() => setShowErrorModal(false)}
-        title="로그인 실패"
+        title={errorTitle}
         message={errorMessage}
+        type={errorType}
         onRetry={handleErrorModalRetry}
         retryText="다시 시도"
-        showRetryButton={true}
+        showRetryButton={errorType !== "info"}
       />
     </div>
   );
