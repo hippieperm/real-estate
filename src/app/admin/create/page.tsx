@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { LocationPicker } from "@/components/ui/location-picker"
+import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
 import { 
   ArrowLeft, 
   Save, 
@@ -23,6 +24,7 @@ import Link from "next/link"
 
 export default function CreateListingPage() {
   const router = useRouter()
+  const { modal, closeModal, showSuccess, showError } = useNotificationModal()
   const [loading, setLoading] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
   const [selectedImages, setSelectedImages] = useState<File[]>([])
@@ -125,6 +127,14 @@ export default function CreateListingPage() {
     setLoading(true)
 
     try {
+      // 콤마 제거 후 숫자 변환
+      const cleanPrice = (value: string) => {
+        if (!value) return null
+        const cleaned = value.replace(/,/g, '')
+        const num = parseFloat(cleaned)
+        return isNaN(num) ? null : num
+      }
+
       // 1. 매물 생성
       const response = await fetch('/api/listings', {
         method: 'POST',
@@ -133,11 +143,11 @@ export default function CreateListingPage() {
         },
         body: JSON.stringify({
           ...formData,
-          price_deposit: Number(formData.price_deposit),
-          price_monthly: formData.price_monthly ? Number(formData.price_monthly) : null,
-          exclusive_m2: Number(formData.exclusive_m2),
-          floor: Number(formData.floor),
-          building_floor: formData.building_floor ? Number(formData.building_floor) : null,
+          price_deposit: cleanPrice(formData.price_deposit),
+          price_monthly: cleanPrice(formData.price_monthly),
+          exclusive_m2: cleanPrice(formData.exclusive_m2),
+          floor: cleanPrice(formData.floor),
+          floors_total: cleanPrice(formData.building_floor),
           latitude: formData.latitude ? Number(formData.latitude) : null,
           longitude: formData.longitude ? Number(formData.longitude) : null,
         })
@@ -160,12 +170,12 @@ export default function CreateListingPage() {
         }
       }
 
-      alert('매물이 성공적으로 등록되었습니다!')
+      showSuccess('성공', '매물이 성공적으로 등록되었습니다!')
       router.push('/admin')
 
     } catch (error) {
       console.error('Create error:', error)
-      alert(`등록에 실패했습니다: ${error.message || error}`)
+      showError('등록 실패', `등록에 실패했습니다: ${error.message || error}`)
     } finally {
       setLoading(false)
     }
@@ -536,7 +546,7 @@ export default function CreateListingPage() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  className="h-12 px-8 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
+                  className="h-12 px-8 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
                 >
                   취소
                 </Button>
@@ -562,6 +572,15 @@ export default function CreateListingPage() {
           </div>
         </form>
       </div>
+      
+      <NotificationModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   )
 }
