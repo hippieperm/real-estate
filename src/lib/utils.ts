@@ -7,6 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(price: number | string): string {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
+  
+  // 1억 이상일 때 억 단위로 표시
+  if (numPrice >= 10000) {
+    const eok = numPrice / 10000;
+    if (eok >= 10) {
+      return `${Math.floor(eok)}억`;
+    } else {
+      return `${eok.toFixed(1)}억`;
+    }
+  }
+  
+  // 1억 미만일 때 만원 단위로 표시
   return new Intl.NumberFormat("ko-KR").format(numPrice);
 }
 
