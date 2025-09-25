@@ -351,7 +351,7 @@ export default function StationsPage() {
                           )}
                         </div>
                         <CardTitle className="text-xl text-slate-800 mb-2">
-                          {station.name}역
+                          {station.name}
                         </CardTitle>
                         <div className="flex items-center gap-2">
                           <Badge className={`text-white ${colors.bg} border-0`}>
