@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Search, Filter, MapPin, X, DollarSign, Square, Plus, Minus, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { formatPrice, formatArea } from "@/lib/utils";
+import { ListingDetailModal } from "@/components/listing/ListingDetailModal";
 
 declare global {
   interface Window {
@@ -33,6 +34,7 @@ export default function MapSearchPage() {
   const [pyeongMaxValue, setPyeongMaxValue] = useState("500");
   const [showFilters, setShowFilters] = useState(true);
   const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
@@ -793,21 +795,39 @@ export default function MapSearchPage() {
                   </span>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200">
-                  <a
-                    href={`/listing/${selectedListing.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div className="pt-4 border-t border-slate-200 space-y-3">
+                  <Button
+                    onClick={() => setShowDetailModal(true)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300"
                   >
-                    <Button className="w-full gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300">
-                      상세보기
+                    상세보기
+                  </Button>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex gap-2 text-sm">
+                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                      <MapPin className="h-3 w-3" />
+                      길찾기
                     </Button>
-                  </a>
+                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                      📞 문의
+                    </Button>
+                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                      ❤️ 찜하기
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
+
+        {/* Listing Detail Modal */}
+        <ListingDetailModal
+          listing={selectedListing}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
       </div>
     </div>
   );
