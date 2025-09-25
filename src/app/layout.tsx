@@ -25,6 +25,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        <script
+          type="text/javascript"
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&libraries=services`}
+          async
+        ></script>
+      </head>
       <body className={inter.className}>
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
