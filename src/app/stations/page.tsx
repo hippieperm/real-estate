@@ -390,15 +390,12 @@ export default function StationsPage() {
                       </div>
 
                       {/* Action Button */}
-                      <Button
-                        className="w-full gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 group-hover:scale-105"
-                        onClick={() =>
-                          (window.location.href = `/list?stations=${station.id}`)
-                        }
-                      >
-                        매물 보기
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
+                      <Link href={`/list?stations=${station.id}`}>
+                        <Button className="w-full gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                          매물 보기
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 );
