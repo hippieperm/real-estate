@@ -78,6 +78,17 @@
   border-color: hsl(var(--border));
 }
 
+/* Ensure interactive elements are clickable */
+button,
+input,
+select,
+textarea,
+a {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -92,6 +103,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -103,6 +115,7 @@ body {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -114,6 +127,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -125,6 +139,7 @@ body {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -136,6 +151,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -143,10 +159,12 @@ body {
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -156,6 +174,7 @@ body {
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: calc(200px + 100%) 0;
   }
@@ -166,6 +185,7 @@ body {
     transform: translateY(-100vh) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) rotate(720deg);
     opacity: 0;
@@ -177,6 +197,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -188,6 +209,7 @@ body {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -195,9 +217,12 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
   }
@@ -265,11 +290,9 @@ body {
 
 /* Modern Gradients */
 .gradient-mesh {
-  background: radial-gradient(
-      at 40% 20%,
+  background: radial-gradient(at 40% 20%,
       hsla(228, 100%, 74%, 1) 0px,
-      transparent 50%
-    ),
+      transparent 50%),
     radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 1) 0px, transparent 50%),
     radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 1) 0px, transparent 50%),
     radial-gradient(at 80% 50%, hsla(340, 100%, 76%, 1) 0px, transparent 50%),

@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
   Building2,
   MapPin,
   Eye,
@@ -60,7 +60,7 @@ export default function AdminPage() {
 
     // 검색어 필터링
     if (searchTerm) {
-      filtered = filtered.filter(listing => 
+      filtered = filtered.filter(listing =>
         listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         listing.address_road.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -74,6 +74,25 @@ export default function AdminPage() {
     setFilteredListings(filtered)
   }
 
+  const handleCreateListing = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('Create listing button clicked!', e)
+    window.location.href = '/admin/create'
+  }
+
+  const handleFilterClick = (status: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('Filter button clicked:', status, e)
+    setStatusFilter(status)
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Search input changed:', e.target.value)
+    setSearchTerm(e.target.value)
+  }
+
   const handleDeleteClick = (id: string) => {
     showWarning(
       '매물 삭제',
@@ -84,7 +103,7 @@ export default function AdminPage() {
 
   const deleteListing = async (id: string) => {
     closeModal()
-    
+
     try {
       const response = await fetch(`/api/listings/${id}`, {
         method: 'DELETE'
@@ -116,9 +135,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50" style={{ position: 'relative', zIndex: 1 }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-2xl">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-2xl" style={{ position: 'relative', zIndex: 10 }}>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -130,19 +149,22 @@ export default function AdminPage() {
               </h1>
               <p className="text-slate-300 text-lg font-medium">등록된 매물을 관리하고 새로운 매물을 추가하세요</p>
             </div>
-            <Link href="/admin/create">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 h-14 px-8 text-lg font-bold rounded-2xl">
-                <Plus className="h-5 w-5 mr-2" />
-                새 매물 등록
-              </Button>
-            </Link>
+            <Button
+              onClick={handleCreateListing}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 h-14 px-8 text-lg font-bold rounded-2xl cursor-pointer"
+              type="button"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 20 }}
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              새 매물 등록
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Filters */}
-        <Card className="mb-8 border-0 shadow-2xl bg-white rounded-3xl overflow-hidden">
+        <Card className="mb-8 border-0 shadow-2xl bg-white rounded-3xl overflow-hidden" style={{ position: 'relative', zIndex: 5 }}>
           <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-1">
             <CardContent className="p-8 bg-white rounded-3xl">
               <div className="flex flex-col md:flex-row gap-6">
@@ -156,8 +178,9 @@ export default function AdminPage() {
                     <Input
                       placeholder="매물명이나 주소를 입력하세요..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={handleSearchChange}
                       className="pl-20 h-16 border-2 border-slate-200 focus:border-blue-500 rounded-2xl text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                      style={{ position: 'relative', zIndex: 10 }}
                     />
                   </div>
                 </div>
@@ -166,12 +189,13 @@ export default function AdminPage() {
                     <Button
                       key={status}
                       variant={statusFilter === status ? "default" : "outline"}
-                      onClick={() => setStatusFilter(status)}
-                      className={`h-16 px-6 rounded-2xl font-bold transition-all duration-300 ${
-                        statusFilter === status
-                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-2xl scale-105"
-                          : "bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 shadow-lg hover:shadow-xl"
-                      }`}
+                      onClick={handleFilterClick(status)}
+                      className={`h-16 px-6 rounded-2xl font-bold transition-all duration-300 cursor-pointer ${statusFilter === status
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-2xl scale-105"
+                        : "bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 shadow-lg hover:shadow-xl"
+                        }`}
+                      type="button"
+                      style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
                     >
                       <Filter className="h-5 w-5 mr-2" />
                       {status === "all" ? "전체" : status === "active" ? "활성" : "비활성"}
@@ -203,7 +227,7 @@ export default function AdminPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-emerald-500 via-green-600 to-teal-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <CardContent className="p-8 relative">
@@ -224,7 +248,7 @@ export default function AdminPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-purple-500 via-violet-600 to-fuchsia-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <CardContent className="p-8 relative">
@@ -253,7 +277,7 @@ export default function AdminPage() {
             <Card key={listing.id} className="group overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-3xl relative">
               {/* 카드 상단 그라디언트 */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
-              
+
               <div className="aspect-video bg-gradient-to-br from-slate-300 via-blue-200 to-purple-300 relative overflow-hidden">
                 <img
                   src={`https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(listing.title.slice(0, 10))}`}
@@ -261,11 +285,11 @@ export default function AdminPage() {
                   className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
+
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <Badge 
-                    className={listing.status === 'active' 
-                      ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold" 
+                  <Badge
+                    className={listing.status === 'active'
+                      ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
                       : "bg-gradient-to-r from-red-500 to-rose-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
                     }
                   >
@@ -350,16 +374,19 @@ export default function AdminPage() {
             <Building2 className="h-24 w-24 text-slate-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-800 mb-2">매물이 없습니다</h3>
             <p className="text-slate-600 mb-6">새로운 매물을 등록해보세요</p>
-            <Link href="/admin/create">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300">
-                <Plus className="h-4 w-4 mr-2" />
-                매물 등록하기
-              </Button>
-            </Link>
+            <Button
+              onClick={handleCreateListing}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 cursor-pointer"
+              type="button"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 20 }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              매물 등록하기
+            </Button>
           </div>
         )}
       </div>
-      
+
       <NotificationModal
         isOpen={modal.isOpen}
         onClose={closeModal}
