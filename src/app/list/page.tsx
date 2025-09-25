@@ -66,6 +66,7 @@ export default function ListSearchPage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [stationInfo, setStationInfo] = useState<any>(null);
 
   const [filters, setFilters] = useState({
     query: searchParams.get("query") || "",
@@ -77,6 +78,7 @@ export default function ListSearchPage() {
     min_pyeong: Number(searchParams.get("min_pyeong")) || 0,
     max_pyeong: Number(searchParams.get("max_pyeong")) || 500,
     sort_by: searchParams.get("sort_by") || "created_at",
+    stations: searchParams.get("stations") ? [Number(searchParams.get("stations"))] : [],
   });
 
   const [depositRange, setDepositRange] = useState([filters.min_deposit, filters.max_deposit]);
@@ -86,6 +88,26 @@ export default function ListSearchPage() {
   useEffect(() => {
     searchListings();
   }, [page]);
+
+  // 역 정보 가져오기
+  useEffect(() => {
+    const stationId = searchParams.get("stations");
+    if (stationId) {
+      fetchStationInfo(stationId);
+    }
+  }, [searchParams]);
+
+  const fetchStationInfo = async (stationId: string) => {
+    try {
+      const response = await fetch(`/api/stations/${stationId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setStationInfo(data.station);
+      }
+    } catch (error) {
+      console.error("Failed to fetch station info:", error);
+    }
+  };
 
   const searchListings = async () => {
     setLoading(true);
@@ -183,14 +205,30 @@ export default function ListSearchPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              <span className="inline-block animate-fade-in-up">완벽한 공간을</span>
-              <br />
-              <span className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" style={{ animationDelay: '0.2s' }}>
-                찾아보세요
-              </span>
+              {stationInfo ? (
+                <>
+                  <span className="inline-block animate-fade-in-up">{stationInfo.name}</span>
+                  <br />
+                  <span className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" style={{ animationDelay: '0.2s' }}>
+                    역세권 매물
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="inline-block animate-fade-in-up">완벽한 공간을</span>
+                  <br />
+                  <span className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" style={{ animationDelay: '0.2s' }}>
+                    찾아보세요
+                  </span>
+                </>
+              )}
             </h1>
             <p className="text-xl text-blue-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              {total.toLocaleString()}개의 프리미엄 매물이 기다리고 있습니다
+              {stationInfo ? (
+                `${stationInfo.line} ${stationInfo.name} 주변 ${total.toLocaleString()}개의 프리미엄 매물`
+              ) : (
+                `${total.toLocaleString()}개의 프리미엄 매물이 기다리고 있습니다`
+              )}
             </p>
           </div>
 
