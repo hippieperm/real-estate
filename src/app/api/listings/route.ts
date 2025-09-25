@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Generate unique code
     const code = `L${Date.now()}`
-    
+
     // Create location point - PostGIS 형식으로 변경
     const insertData = {
       code,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     // 매물 생성
     const { data: listing, error } = await supabase
       .from('listings')
-      .insert(insertData)
+      .insert(insertData as any)
       .select()
       .single()
 
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
 
     // location 컬럼을 별도로 업데이트 (PostGIS)
     if (listing && latitude && longitude) {
-      const { error: updateError } = await supabase.rpc('update_listing_location', {
-        listing_id: listing.id,
+      const { error: updateError } = await (supabase as any).rpc('update_listing_location', {
+        listing_id: (listing as any).id,
         lat: Number(latitude),
         lng: Number(longitude)
       })
