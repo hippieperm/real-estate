@@ -88,8 +88,24 @@ export default function LocationPickerPage() {
 
     container.innerHTML = results.map((result, index) => `
       <div class="result-item" data-index="${index}">
-        <div style="font-weight:bold;margin-bottom:4px;">📍 ${result.road_address?.address_name || result.address_name}</div>
-        ${result.road_address ? `<div style="color:#64748b;font-size:14px;">지번: ${result.address_name}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;background:linear-gradient(135deg,#dbeafe,#e0e7ff);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="font-size:20px;">📍</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;margin-bottom:6px;font-size:16px;color:#1e293b;line-height:1.4;">${result.road_address?.address_name || result.address_name}</div>
+            ${result.road_address ? `<div style="color:#64748b;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              지번: ${result.address_name}
+            </div>` : ''}
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
       </div>
     `).join('')
 
@@ -155,22 +171,94 @@ export default function LocationPickerPage() {
         <p style={{ opacity: 0.9, fontSize: '16px' }}>지도를 클릭하거나 주소를 검색하여 정확한 위치를 선택하세요</p>
       </div>
 
-      <div style={{ padding: '24px', background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="도로명 주소를 입력하세요 (예: 강남구 테헤란로 123)"
-            style={{ flex: 1, height: '64px', padding: '0 24px', border: '2px solid #e2e8f0', borderRadius: '24px', fontSize: '18px', outline: 'none' }}
-          />
-          <button
-            id="searchBtn"
-            style={{ height: '64px', padding: '0 32px', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', border: 'none', borderRadius: '24px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' }}
-          >
-            🔍 주소 검색
-          </button>
+      <div style={{ padding: '32px 24px', background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%)', borderBottom: '1px solid rgba(226,232,240,0.6)', backdropFilter: 'blur(20px)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'stretch', position: 'relative' }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <div style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(59,130,246,0.25)' }}>
+                  <span style={{ fontSize: '20px' }}>🔍</span>
+                </div>
+                <div style={{ height: '32px', width: '1px', background: 'linear-gradient(to bottom, transparent, #e2e8f0, transparent)' }} />
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="도로명 주소를 입력하세요 (예: 강남구 테헤란로 123)"
+                style={{ 
+                  width: '100%',
+                  height: '72px', 
+                  padding: '0 28px 0 100px',
+                  border: '2px solid transparent',
+                  borderRadius: '20px',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  outline: 'none',
+                  background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #e0e7ff, #dbeafe) border-box',
+                  boxShadow: '0 8px 24px rgba(59,130,246,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  color: '#1e293b'
+                }}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = '0 12px 32px rgba(59,130,246,0.15), 0 4px 12px rgba(99,102,241,0.1)'
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.borderColor = 'rgba(99,102,241,0.3)'
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = '0 8px 24px rgba(59,130,246,0.08), 0 2px 8px rgba(0,0,0,0.04)'
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.borderColor = 'transparent'
+                }}
+              />
+            </div>
+            <button
+              id="searchBtn"
+              style={{ 
+                height: '72px',
+                padding: '0 40px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '20px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(99,102,241,0.25), 0 4px 12px rgba(139,92,246,0.15)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                minWidth: '160px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(99,102,241,0.35), 0 6px 16px rgba(139,92,246,0.25)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.25), 0 4px 12px rgba(139,92,246,0.15)'
+              }}
+            >
+              <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                주소 검색
+              </span>
+            </button>
+          </div>
+          <div id="searchResults" style={{ 
+            maxHeight: '280px',
+            overflowY: 'auto',
+            background: 'rgba(255,255,255,0.98)',
+            border: '2px solid rgba(226,232,240,0.6)',
+            borderRadius: '20px',
+            marginTop: '16px',
+            display: 'none',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)'
+          }} />
         </div>
-        <div id="searchResults" style={{ maxHeight: '200px', overflowY: 'auto', background: 'white', border: '2px solid #e2e8f0', borderRadius: '16px', marginTop: '16px', display: 'none' }} />
       </div>
 
       <div style={{ flex: 1, position: 'relative' }}>
@@ -224,16 +312,28 @@ export default function LocationPickerPage() {
 
       <style jsx>{`
         .result-item {
-          padding: 16px 24px;
-          border-bottom: 1px solid #f1f5f9;
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(241,245,249,0.8);
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          background: linear-gradient(90deg, transparent 0%, transparent 100%);
         }
         .result-item:hover {
-          background: #f8fafc;
+          background: linear-gradient(90deg, rgba(59,130,246,0.03) 0%, rgba(99,102,241,0.05) 100%);
+          padding-left: 32px;
+          border-left: 3px solid #6366f1;
         }
         .result-item:last-child {
           border-bottom: none;
+        }
+        .result-item:first-child {
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+        }
+        .result-item:last-child {
+          border-bottom-left-radius: 20px;
+          border-bottom-right-radius: 20px;
         }
       `}</style>
     </div>
