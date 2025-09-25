@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal";
 import {
   MessageSquare,
   Building,
@@ -90,6 +91,7 @@ const formatPhoneNumber = (value: string) => {
 };
 
 export default function InquiryPage() {
+  const { modal, closeModal, showError } = useNotificationModal();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState("");
@@ -200,7 +202,7 @@ ${data.message}
       }
     } catch (error) {
       console.error("Inquiry submission error:", error);
-      alert("문의 전송에 실패했습니다. 다시 시도해주세요.");
+      showError('오류', '문의 전송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -709,6 +711,15 @@ ${data.message}
           </div>
         </form>
       </div>
+      
+      <NotificationModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 }
