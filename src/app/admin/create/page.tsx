@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { LocationPicker } from "@/components/ui/location-picker"
 import { 
   ArrowLeft, 
   Save, 
@@ -61,6 +62,22 @@ export default function CreateListingPage() {
     setFormData(prev => ({
       ...prev,
       [field]: numericValue
+    }))
+  }
+
+  const handleLocationSelect = (location: {
+    address: string
+    latitude: number
+    longitude: number
+    roadAddress?: string
+    jibunAddress?: string
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      address_road: location.roadAddress || location.address,
+      address_jibun: location.jibunAddress || '',
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString()
     }))
   }
 
@@ -433,38 +450,35 @@ export default function CreateListingPage() {
             </CardHeader>
             <CardContent className="space-y-8 relative">
               <div className="group">
-                <Label htmlFor="address_road" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  🗺️ 도로명 주소 
+                <Label className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  🗺️ 위치 선택 
                   <span className="text-red-500">*</span>
                   <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
-                <Input
-                  id="address_road"
-                  value={formData.address_road}
-                  onChange={(e) => handleInputChange('address_road', e.target.value)}
-                  placeholder="서울특별시 강남구 테헤란로 123"
-                  required
-                  className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                <LocationPicker
+                  onLocationSelect={handleLocationSelect}
+                  initialAddress={formData.address_road}
                 />
-              </div>
-
-              <div className="group">
-                <Label htmlFor="address_jibun" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  📍 지번 주소
-                  <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </Label>
-                <Input
-                  id="address_jibun"
-                  value={formData.address_jibun}
-                  onChange={(e) => handleInputChange('address_jibun', e.target.value)}
-                  placeholder="서울특별시 강남구 역삼동 123-45"
-                  className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-                />
+                {formData.address_road && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-xl">
+                    <div className="text-sm font-medium text-blue-900">
+                      📍 {formData.address_road}
+                    </div>
+                    {formData.address_jibun && (
+                      <div className="text-xs text-blue-700 mt-1">
+                        지번: {formData.address_jibun}
+                      </div>
+                    )}
+                    <div className="text-xs text-blue-600 mt-1">
+                      좌표: {formData.latitude}, {formData.longitude}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="group">
                 <Label htmlFor="address_detail" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  🏢 상세 주소
+                  🏢 상세 주소 (동/호수)
                   <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
                 <Input
@@ -474,39 +488,6 @@ export default function CreateListingPage() {
                   placeholder="15층 1501호"
                   className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="group">
-                  <Label htmlFor="latitude" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    🌎 위도
-                    <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </Label>
-                  <Input
-                    id="latitude"
-                    type="number"
-                    step="0.000001"
-                    value={formData.latitude}
-                    onChange={(e) => handleInputChange('latitude', e.target.value)}
-                    placeholder="37.4979"
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-                  />
-                </div>
-                <div className="group">
-                  <Label htmlFor="longitude" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    🌍 경도
-                    <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </Label>
-                  <Input
-                    id="longitude"
-                    type="number"
-                    step="0.000001"
-                    value={formData.longitude}
-                    onChange={(e) => handleInputChange('longitude', e.target.value)}
-                    placeholder="127.0276"
-                    className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-                  />
-                </div>
               </div>
             </CardContent>
           </Card>
