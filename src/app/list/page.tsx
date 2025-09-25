@@ -459,8 +459,8 @@ export default function ListSearchPage() {
                           className="mb-4"
                         />
                         <div className="flex justify-between text-sm text-slate-600">
-                          <span>{depositRange[0].toLocaleString()}만원</span>
-                          <span>{depositRange[1].toLocaleString()}만원</span>
+                          <span>{formatPrice(depositRange[0])}{depositRange[0] < 10000 ? '만원' : ''}</span>
+                          <span>{formatPrice(depositRange[1])}{depositRange[1] < 10000 ? '만원' : ''}</span>
                         </div>
                       </div>
                     </div>
@@ -479,8 +479,8 @@ export default function ListSearchPage() {
                           className="mb-4"
                         />
                         <div className="flex justify-between text-sm text-slate-600">
-                          <span>{monthlyRange[0].toLocaleString()}만원</span>
-                          <span>{monthlyRange[1].toLocaleString()}만원</span>
+                          <span>{formatPrice(monthlyRange[0])}{monthlyRange[0] < 10000 ? '만원' : ''}</span>
+                          <span>{formatPrice(monthlyRange[1])}{monthlyRange[1] < 10000 ? '만원' : ''}</span>
                         </div>
                       </div>
                     </div>
