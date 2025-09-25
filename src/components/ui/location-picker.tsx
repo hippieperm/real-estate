@@ -54,59 +54,154 @@ export function LocationPicker({ onLocationSelect, initialAddress = '', classNam
   }, [isOpen])
 
   const initializeMap = () => {
-    if (typeof window === 'undefined' || !window.kakao || !window.kakao.maps) {
-      console.error('Kakao Maps API not loaded')
+    console.log('initializeMap 시작')
+    
+    if (typeof window === 'undefined') {
+      console.error('Window is undefined')
       setMapLoading(false)
-      setMapError('지도 API를 로드할 수 없습니다.')
+      setMapError('브라우저 환경이 아닙니다.')
       return
     }
 
-    try {
-      const { kakao } = window
-      
-      // 지도 옵션
-      const options = {
-        center: new kakao.maps.LatLng(37.5665, 126.9780), // 서울 중심
-        level: 3,
-        mapTypeId: kakao.maps.MapTypeId.ROADMAP
-      }
-
-      // 지도 생성
-      const map = new kakao.maps.Map(mapRef.current, options)
-      kakaoMapRef.current = map
-
-      // 지도 로딩 완료 후 처리
-      kakao.maps.event.addListener(map, 'tilesloaded', () => {
-        setMapLoading(false)
-        setMapError(null)
-        
-        // 크기 재조정
-        setTimeout(() => {
-          if (map) {
-            map.relayout()
-          }
-        }, 100)
-      })
-
-      // 지도 클릭 이벤트
-      kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
-        const latlng = mouseEvent.latLng
-        addMarker(latlng)
-        searchAddressByCoordinates(latlng.getLat(), latlng.getLng())
-      })
-
-      // 3초 후에도 로딩 중이면 강제로 로딩 완료
-      setTimeout(() => {
-        if (mapLoading) {
-          setMapLoading(false)
-        }
-      }, 3000)
-      
-    } catch (error) {
-      console.error('Error initializing map:', error)
+    if (!window.kakao) {
+      console.error('Kakao object not found')
       setMapLoading(false)
-      setMapError('지도 초기화에 실패했습니다.')
+      setMapError('Kakao Maps API가 로드되지 않았습니다.')
+      return
     }
+
+    // Kakao Maps API 완전 로딩 대기 (더 안정적인 방식)
+    const initKakaoMap = () => {
+      console.log('Kakao 상태 확인:', {
+        kakao: !!window.kakao,
+        maps: !!window.kakao?.maps,
+        LatLng: !!window.kakao?.maps?.LatLng,
+        Map: !!window.kakao?.maps?.Map
+      })
+
+      // 완전히 로드되지 않은 경우 kakao.maps.load() 사용
+      if (!window.kakao.maps || !window.kakao.maps.LatLng) {
+        console.log('Kakao Maps API 완전 로딩 대기중...')
+        
+        // kakao.maps.load가 없는 경우를 위한 폴백
+        if (typeof window.kakao.maps?.load === 'function') {
+          window.kakao.maps.load(() => {
+            console.log('kakao.maps.load() 완료')
+            // 로드 완료 후 다시 한번 확인
+            setTimeout(() => {
+              if (window.kakao.maps && window.kakao.maps.LatLng) {
+                createMap()
+              } else {
+                console.error('kakao.maps.load() 후에도 LatLng를 사용할 수 없음')
+                setMapLoading(false)
+                setMapError('Kakao Maps API 초기화에 실패했습니다.')
+              }
+            }, 100)
+          })
+        } else {
+          // kakao.maps.load가 없는 경우 재시도
+          let retryCount = 0
+          const maxRetries = 50
+          
+          const checkAndRetry = () => {
+            if (window.kakao.maps && window.kakao.maps.LatLng) {
+              createMap()
+            } else if (retryCount < maxRetries) {
+              retryCount++
+              console.log(`재시도 ${retryCount}/${maxRetries}`)
+              setTimeout(checkAndRetry, 100)
+            } else {
+              setMapLoading(false)
+              setMapError('Kakao Maps API 로딩 타임아웃')
+            }
+          }
+          
+          checkAndRetry()
+        }
+      } else {
+        console.log('Kakao Maps API 이미 준비됨')
+        createMap()
+      }
+    }
+
+    const createMap = () => {
+      try {
+        console.log('지도 생성 시작')
+        
+        // 필수 객체들이 모두 있는지 확인
+        if (!window.kakao) {
+          throw new Error('window.kakao 객체를 찾을 수 없습니다')
+        }
+        
+        if (!window.kakao.maps) {
+          throw new Error('window.kakao.maps 객체를 찾을 수 없습니다')
+        }
+        
+        if (!window.kakao.maps.LatLng) {
+          throw new Error('kakao.maps.LatLng 생성자를 찾을 수 없습니다')
+        }
+        
+        if (!window.kakao.maps.Map) {
+          throw new Error('kakao.maps.Map 생성자를 찾을 수 없습니다')
+        }
+        
+        if (!mapRef.current) {
+          throw new Error('지도를 표시할 DOM 요소를 찾을 수 없습니다')
+        }
+
+        const { kakao } = window
+        
+        // 지도 옵션
+        const options = {
+          center: new kakao.maps.LatLng(37.5665, 126.9780), // 서울 중심
+          level: 3,
+          mapTypeId: kakao.maps.MapTypeId.ROADMAP
+        }
+
+        console.log('Kakao Maps 객체 생성 시도')
+        
+        // 지도 생성
+        const map = new kakao.maps.Map(mapRef.current, options)
+        kakaoMapRef.current = map
+        console.log('지도 생성 완료')
+
+        // 지도 로딩 완료 후 처리
+        kakao.maps.event.addListener(map, 'tilesloaded', () => {
+          console.log('타일 로딩 완료')
+          setMapLoading(false)
+          setMapError(null)
+          
+          // 크기 재조정
+          setTimeout(() => {
+            if (map) {
+              map.relayout()
+            }
+          }, 100)
+        })
+
+        // 지도 클릭 이벤트
+        kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
+          const latlng = mouseEvent.latLng
+          addMarker(latlng)
+          searchAddressByCoordinates(latlng.getLat(), latlng.getLng())
+        })
+
+        // 5초 후에도 로딩 중이면 강제로 로딩 완료
+        setTimeout(() => {
+          if (mapLoading) {
+            console.log('5초 타임아웃으로 로딩 완료 처리')
+            setMapLoading(false)
+          }
+        }, 5000)
+        
+      } catch (error) {
+        console.error('지도 생성 에러:', error)
+        setMapLoading(false)
+        setMapError(`지도 초기화 실패: ${error.message || error}`)
+      }
+    }
+
+    initKakaoMap()
   }
 
   const addMarker = (position: any) => {
@@ -207,84 +302,98 @@ export function LocationPicker({ onLocationSelect, initialAddress = '', classNam
         type="button"
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className={`h-12 w-full justify-between text-left border-2 border-dashed border-blue-300 hover:border-blue-500 bg-blue-50/50 hover:bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group ${className}`}
+        className={`h-16 w-full justify-between text-left border-2 border-dashed border-blue-300 hover:border-blue-500 bg-white hover:bg-blue-50/30 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 group ${className}`}
       >
-        <div className="flex items-center">
-          <div className="p-2 bg-blue-100 rounded-lg mr-3 group-hover:bg-blue-200 transition-colors">
-            <MapPin className="h-4 w-4 text-blue-600" />
+        <div className="flex items-center flex-1 min-w-0">
+          <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl mr-4 group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-200 shadow-md flex-shrink-0">
+            <MapPin className="h-5 w-5 text-white" />
           </div>
-          <div>
-            <div className="text-sm font-medium text-gray-900">
-              {initialAddress ? '선택된 위치' : '위치 선택'}
+          <div className="flex-1 min-w-0">
+            <div className="text-base font-bold text-gray-900 mb-1">
+              {initialAddress ? '✅ 선택된 위치' : '📍 위치 선택'}
             </div>
-            <div className="text-xs text-gray-500 truncate max-w-[300px]">
-              {initialAddress || '지도에서 클릭하거나 주소를 검색하세요'}
+            <div className="text-sm font-medium text-gray-700 truncate pr-4">
+              {initialAddress ? (
+                <span className="text-blue-700 bg-blue-50 px-2 py-1 rounded-md">
+                  {initialAddress}
+                </span>
+              ) : (
+                <span className="text-gray-600">
+                  지도에서 클릭하거나 주소를 검색하세요
+                </span>
+              )}
             </div>
           </div>
         </div>
-        <div className="text-xs text-blue-600 font-medium flex items-center">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center shadow-md group-hover:shadow-lg transition-all duration-200 flex-shrink-0">
           지도 열기
-          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </div>
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="absolute inset-4 bg-white rounded-3xl shadow-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500">
             {/* 헤더 */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">위치 선택</h2>
-                <p className="text-sm text-gray-500 hidden sm:block">지도를 클릭하거나 주소를 검색하세요</p>
+            <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 p-6 flex items-center justify-between text-white flex-shrink-0">
+              <div className="absolute inset-0 bg-black/5"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <MapPin className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold">위치 선택</h2>
+                    <p className="text-blue-100 text-base mt-1">지도를 클릭하거나 주소를 검색하여 정확한 위치를 선택하세요</p>
+                  </div>
+                </div>
               </div>
               <Button
-                variant="outline"
-                size="sm"
                 onClick={() => setIsOpen(false)}
-                className="p-2"
+                className="relative z-10 bg-white/10 hover:bg-white/20 border-white/20 text-white rounded-full w-12 h-12 p-0 transition-all duration-200"
               >
-                <X className="h-4 w-4" />
+                <X className="h-6 w-6" />
               </Button>
             </div>
 
             {/* 검색 바 */}
-            <div className="p-4 border-b border-gray-100 flex-shrink-0">
-              <div className="relative flex flex-col sm:flex-row gap-2">
+            <div className="p-6 sm:p-8 bg-gray-50/50 border-b border-gray-200 flex-shrink-0">
+              <div className="relative flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
                   <Input
                     placeholder="도로명 주소 입력 (예: 강남구 테헤란로 123)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="pr-10 h-10 sm:h-12 rounded-xl text-sm"
+                    className="pr-12 h-14 rounded-2xl text-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 shadow-sm hover:shadow-md transition-all duration-200"
                   />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
                 </div>
                 <Button
                   onClick={searchAddress}
                   disabled={isLoading}
-                  className="h-10 sm:h-12 px-4 sm:px-6 rounded-xl text-sm"
+                  className="h-14 px-8 rounded-2xl text-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  {isLoading ? '검색중...' : '검색'}
+                  {isLoading ? '검색중...' : '🔍 검색'}
                 </Button>
               </div>
 
               {/* 검색 결과 */}
               {searchResults.length > 0 && (
-                <div className="mt-3 max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
+                <div className="mt-6 max-h-48 overflow-y-auto bg-white border-2 border-gray-200 rounded-2xl shadow-xl">
                   {searchResults.map((result, index) => (
                     <button
                       key={index}
                       onClick={() => selectSearchResult(result)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      className="w-full text-left px-6 py-4 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200 group"
                     >
-                      <div className="text-sm font-medium text-gray-900 truncate">
-                        {result.road_address?.address_name || result.address_name}
+                      <div className="text-base font-semibold text-gray-900 truncate group-hover:text-blue-700">
+                        📍 {result.road_address?.address_name || result.address_name}
                       </div>
                       {result.road_address && (
-                        <div className="text-xs text-gray-500 mt-1 truncate">
+                        <div className="text-sm text-gray-500 mt-1 truncate">
                           지번: {result.address_name}
                         </div>
                       )}
@@ -295,7 +404,7 @@ export function LocationPicker({ onLocationSelect, initialAddress = '', classNam
             </div>
 
             {/* 지도 */}
-            <div className="flex-1 relative min-h-[300px] sm:min-h-[400px]">
+            <div className="flex-1 relative min-h-[500px] sm:min-h-[600px] lg:min-h-[700px]">
               <div ref={mapRef} className="w-full h-full" />
               
               {/* 로딩 상태 */}
@@ -336,19 +445,24 @@ export function LocationPicker({ onLocationSelect, initialAddress = '', classNam
               
               {/* 선택된 위치 정보 */}
               {selectedLocation && !mapLoading && !mapError && (
-                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border-2 border-white/50">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                      <MapPin className="h-6 w-6 text-white" />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                      <div className="text-lg font-bold text-gray-900 truncate mb-2">
+                        ✅ 위치가 선택되었습니다
+                      </div>
+                      <div className="text-base font-semibold text-gray-800 truncate">
                         {selectedLocation.roadAddress || selectedLocation.address}
                       </div>
                       {selectedLocation.jibunAddress && selectedLocation.roadAddress && (
-                        <div className="text-xs text-gray-500 mt-1 truncate">
+                        <div className="text-sm text-gray-600 mt-1 truncate">
                           지번: {selectedLocation.jibunAddress}
                         </div>
                       )}
-                      <div className="text-xs text-gray-400 mt-1 hidden sm:block">
+                      <div className="text-xs text-gray-500 mt-2 font-mono bg-gray-100 px-3 py-1 rounded-lg">
                         위도: {selectedLocation.latitude.toFixed(6)}, 경도: {selectedLocation.longitude.toFixed(6)}
                       </div>
                     </div>
@@ -358,20 +472,20 @@ export function LocationPicker({ onLocationSelect, initialAddress = '', classNam
             </div>
 
             {/* 푸터 */}
-            <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-3 flex-shrink-0">
+            <div className="p-6 sm:p-8 bg-gray-50/50 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-4 flex-shrink-0">
               <Button
                 variant="outline"
                 onClick={() => setIsOpen(false)}
-                className="px-6 order-2 sm:order-1"
+                className="h-14 px-8 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 order-2 sm:order-1"
               >
                 취소
               </Button>
               <Button
                 onClick={handleConfirm}
                 disabled={!selectedLocation}
-                className="px-6 bg-blue-600 hover:bg-blue-700 order-1 sm:order-2"
+                className="h-14 px-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-2xl font-bold shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 order-1 sm:order-2"
               >
-                선택 완료
+                {selectedLocation ? '✅ 선택 완료' : '위치를 선택해주세요'}
               </Button>
             </div>
           </div>
