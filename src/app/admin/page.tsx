@@ -118,16 +118,21 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 mb-2">매물 관리</h1>
-              <p className="text-slate-600">등록된 매물을 관리하고 새로운 매물을 추가하세요</p>
+              <h1 className="text-4xl font-bold text-white mb-3 flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg shadow-blue-500/30">
+                  <Building2 className="h-8 w-8 text-white" />
+                </div>
+                매물 관리
+              </h1>
+              <p className="text-slate-300 text-lg font-medium">등록된 매물을 관리하고 새로운 매물을 추가하세요</p>
             </div>
             <Link href="/admin/create">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 h-14 px-8 text-lg font-bold rounded-2xl">
+                <Plus className="h-5 w-5 mr-2" />
                 새 매물 등록
               </Button>
             </Link>
@@ -233,10 +238,10 @@ export default function AdminPage() {
               </div>
 
               <CardHeader>
-                <CardTitle className="text-lg line-clamp-2">{listing.title}</CardTitle>
+                <CardTitle className="text-xl font-bold text-slate-900 line-clamp-2 mb-2">{listing.title}</CardTitle>
                 <div className="flex items-center gap-2 text-slate-600">
                   <MapPin className="h-4 w-4" />
-                  <span className="text-sm">{listing.address_road}</span>
+                  <span className="text-sm font-medium">{listing.address_road}</span>
                 </div>
               </CardHeader>
 
