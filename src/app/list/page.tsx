@@ -403,15 +403,15 @@ export default function ListSearchPage() {
                           } else {
                             switch (type.color) {
                               case "blue":
-                                return "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300";
+                                return "bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-800";
                               case "green":
-                                return "bg-white border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300";
+                                return "bg-white border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 hover:text-green-800";
                               case "purple":
-                                return "bg-white border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300";
+                                return "bg-white border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-800";
                               case "orange":
-                                return "bg-white border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300";
+                                return "bg-white border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-800";
                               default:
-                                return "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300";
+                                return "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800";
                             }
                           }
                         };
