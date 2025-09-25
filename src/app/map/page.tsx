@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Search, Filter, MapPin, X, DollarSign, Square } from "lucide-react";
+import { Search, Filter, MapPin, X, DollarSign, Square, Plus, Minus, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { formatPrice, formatArea } from "@/lib/utils";
 
 declare global {
@@ -37,35 +37,141 @@ export default function MapSearchPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markers = useRef<any[]>([]);
+  const [mapZoomLevel, setMapZoomLevel] = useState(5);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // 로딩 타임아웃 설정 (10초)
+    const timeout = setTimeout(() => {
+      setMapError('지도 로딩이 너무 오래 걸립니다. 페이지를 새로고침 해주세요.');
+    }, 10000);
+    setLoadingTimeout(timeout);
+
+    // 카카오 맵 API 키 확인
+    if (!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY) {
+      setMapError('카카오 맵 API 키가 설정되지 않았습니다.');
+      return;
+    }
+
     // Load Kakao Maps SDK
     const script = document.createElement("script");
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services,clusterer`;
     script.async = true;
 
+    script.onerror = () => {
+      clearTimeout(timeout);
+      setMapError('카카오 맵 SDK 로드에 실패했습니다. 인터넷 연결을 확인해주세요.');
+    };
+
     script.onload = () => {
-      window.kakao.maps.load(() => {
+      try {
+        window.kakao.maps.load(() => {
         if (mapRef.current) {
           const options = {
             center: new window.kakao.maps.LatLng(37.5065, 127.0543), // Gangnam
             level: 5,
+            // 부드러운 확대/축소를 위한 설정
+            draggable: true,
+            scrollwheel: true,
+            disableDoubleClick: false,
+            disableDoubleClickZoom: false,
           };
           mapInstance.current = new window.kakao.maps.Map(
             mapRef.current,
             options
           );
+          
+          // 확대/축소 애니메이션 설정
+          mapInstance.current.setZoomable(true);
+          
+          // 부드러운 지도 이동을 위한 커스텀 컨트롤 추가 (안전하게)
+          try {
+            if (window.kakao.maps.MapTypeControl) {
+              const mapTypeControl = new window.kakao.maps.MapTypeControl();
+              mapInstance.current.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
+            }
+            
+            if (window.kakao.maps.ZoomControl) {
+              const zoomControl = new window.kakao.maps.ZoomControl();
+              mapInstance.current.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
+            }
+          } catch (controlError) {
+            console.warn('Map controls could not be added:', controlError);
+          }
+          
+          // 부드러운 줌 변경 이벤트 (안전하게 등록)
+          try {
+            window.kakao.maps.event.addListener(mapInstance.current, 'zoom_start', function() {
+              if (mapRef.current) {
+                mapRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+              }
+            });
+            
+            window.kakao.maps.event.addListener(mapInstance.current, 'zoom_changed', function() {
+              const level = mapInstance.current.getLevel();
+              setMapZoomLevel(level);
+              
+              if (mapRef.current) {
+                mapRef.current.style.transform = `scale(${1 + (level - 5) * 0.01})`;
+                setTimeout(() => {
+                  if (mapRef.current) {
+                    mapRef.current.style.transform = 'scale(1)';
+                  }
+                }, 300);
+              }
+            });
+            
+            window.kakao.maps.event.addListener(mapInstance.current, 'dragstart', function() {
+              if (mapRef.current) {
+                mapRef.current.style.transition = 'transform 0.2s ease-out';
+              }
+            });
+            
+            window.kakao.maps.event.addListener(mapInstance.current, 'dragend', function() {
+              if (mapRef.current) {
+                mapRef.current.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+                mapRef.current.style.transform = 'scale(0.999)';
+                setTimeout(() => {
+                  if (mapRef.current) {
+                    mapRef.current.style.transform = 'scale(1)';
+                  }
+                }, 100);
+              }
+            });
+          } catch (eventError) {
+            console.warn('Map event listeners could not be added:', eventError);
+          }
 
+          // 지도 로드 완료 후 부드러운 페이드인 효과
+          clearTimeout(timeout);
+          setTimeout(() => {
+            if (mapRef.current) {
+              mapRef.current.style.opacity = '1';
+              mapRef.current.style.transition = 'opacity 0.5s ease-in-out, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+              setIsMapLoaded(true);
+            }
+          }, 100);
+          
           // Initial search
           searchListings();
         }
-      });
+        });
+      } catch (error) {
+        clearTimeout(timeout);
+        console.error('Kakao Maps initialization error:', error);
+        setMapError('지도 초기화 중 오류가 발생했습니다.');
+      }
     };
 
     document.head.appendChild(script);
 
     return () => {
       // Cleanup
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
       markers.current.forEach((marker) => marker.setMap(null));
     };
   }, []);
@@ -132,6 +238,63 @@ export default function MapSearchPage() {
     setFilters({ ...filters, max_pyeong: Number(value) || 500 });
   };
 
+  // 부드러운 줌 인/아웃 함수
+  const handleZoomIn = () => {
+    if (mapInstance.current && mapZoomLevel > 1) {
+      const newLevel = mapZoomLevel - 1;
+      try {
+        // 애니메이션 옵션이 지원되는지 확인하고 사용
+        if (typeof mapInstance.current.setLevel === 'function') {
+          mapInstance.current.setLevel(newLevel);
+          setMapZoomLevel(newLevel);
+        }
+      } catch (error) {
+        console.warn('Zoom in failed:', error);
+      }
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapInstance.current && mapZoomLevel < 14) {
+      const newLevel = mapZoomLevel + 1;
+      try {
+        if (typeof mapInstance.current.setLevel === 'function') {
+          mapInstance.current.setLevel(newLevel);
+          setMapZoomLevel(newLevel);
+        }
+      } catch (error) {
+        console.warn('Zoom out failed:', error);
+      }
+    }
+  };
+
+  // 현재 위치로 부드럽게 이동
+  const moveToCurrentLocation = () => {
+    if (navigator.geolocation && mapInstance.current) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          try {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const moveLatLng = new window.kakao.maps.LatLng(lat, lng);
+            
+            // 부드러운 이동 애니메이션
+            if (typeof mapInstance.current.panTo === 'function') {
+              mapInstance.current.panTo(moveLatLng);
+            } else if (typeof mapInstance.current.setCenter === 'function') {
+              mapInstance.current.setCenter(moveLatLng);
+            }
+          } catch (error) {
+            console.warn('Move to location failed:', error);
+          }
+        },
+        (error) => {
+          console.warn("위치 정보를 가져올 수 없습니다:", error);
+        }
+      );
+    }
+  };
+
   const updateMapMarkers = (listings: any[]) => {
     if (!mapInstance.current || !window.kakao) return;
 
@@ -139,12 +302,19 @@ export default function MapSearchPage() {
     markers.current.forEach((marker) => marker.setMap(null));
     markers.current = [];
 
-    // Create marker clusterer
-    const clusterer = new window.kakao.maps.MarkerClusterer({
-      map: mapInstance.current,
-      averageCenter: true,
-      minLevel: 3,
-    });
+    // Create marker clusterer (안전하게)
+    let clusterer = null;
+    try {
+      if (window.kakao.maps.MarkerClusterer) {
+        clusterer = new window.kakao.maps.MarkerClusterer({
+          map: mapInstance.current,
+          averageCenter: true,
+          minLevel: 3,
+        });
+      }
+    } catch (clustererError) {
+      console.warn('MarkerClusterer could not be created:', clustererError);
+    }
 
     const newMarkers = listings.map((listing) => {
       // Parse location (would need actual coordinates from PostGIS)
@@ -164,7 +334,9 @@ export default function MapSearchPage() {
       return marker;
     });
 
-    clusterer.addMarkers(newMarkers);
+    if (clusterer) {
+      clusterer.addMarkers(newMarkers);
+    }
     markers.current = newMarkers;
   };
 
@@ -383,10 +555,162 @@ export default function MapSearchPage() {
 
       {/* Map */}
       <div className="flex-1 relative">
-        <div
-          ref={mapRef}
-          className="w-full h-full rounded-r-lg overflow-hidden"
-        />
+        {/* 지도 로딩 상태 */}
+        {!isMapLoaded && !mapError && (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center z-20 rounded-r-lg">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">지도 로딩 중...</h3>
+                <p className="text-slate-600 text-sm">카카오 지도를 불러오고 있습니다</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 지도 로딩 에러 상태 */}
+        {mapError && (
+          <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center z-20 rounded-r-lg">
+            <div className="text-center space-y-6 max-w-md px-6">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">지도 로딩 실패</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{mapError}</p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => {
+                      setMapError(null);
+                      setIsMapLoaded(false);
+                      window.location.reload();
+                    }}
+                    className="bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    다시 시도
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setMapError(null);
+                      setIsMapLoaded(true); // 기본 지도 표시
+                    }}
+                    variant="outline"
+                    className="border-slate-300 hover:bg-slate-50"
+                  >
+                    목록으로 보기
+                  </Button>
+                </div>
+                <div className="text-xs text-slate-500">
+                  네트워크 문제나 API 키 설정을 확인해주세요
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 실제 지도 또는 대체 컨텐츠 */}
+        {mapError && isMapLoaded ? (
+          // 지도 로딩 실패 시 매물 그리드 표시
+          <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-r-lg p-6 overflow-auto">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">매물 목록</h3>
+              <p className="text-slate-600">지도 대신 매물을 목록 형태로 확인하세요</p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {listings.map((listing, index) => (
+                <Card
+                  key={listing.id}
+                  className="hover:shadow-lg transition-all duration-300 hover:scale-105 border-white/50 bg-white/90 backdrop-blur-sm group cursor-pointer"
+                  onClick={() => setSelectedListing(listing)}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold text-slate-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {listing.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-lg text-slate-800">
+                        보증금 {new Intl.NumberFormat("ko-KR").format(listing.price_deposit)}만원
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        전용 {formatArea(listing.exclusive_m2)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {listing.floor}층
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-500 line-clamp-1 flex items-center gap-2">
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      {listing.address_road}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          // 정상적인 지도
+          <div
+            ref={mapRef}
+            className="w-full h-full rounded-r-lg overflow-hidden transition-all duration-300"
+            style={{ 
+              opacity: 0,
+              filter: 'blur(0px)',
+              transform: 'scale(1)'
+            }}
+          />
+        )}
+        
+        {/* 커스텀 줌 컨트롤 */}
+        {isMapLoaded && (
+          <div className="absolute right-6 top-1/2 transform -translate-y-1/2 z-10 space-y-2">
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-slate-200/50 overflow-hidden">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleZoomIn}
+                disabled={mapZoomLevel <= 1}
+                className="h-12 w-12 rounded-none border-b border-slate-200/50 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <div className="px-4 py-2 text-center text-xs font-medium text-slate-600 bg-slate-50/50">
+                {mapZoomLevel}
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleZoomOut}
+                disabled={mapZoomLevel >= 14}
+                className="h-12 w-12 rounded-none border-t border-slate-200/50 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 disabled:opacity-50"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* 현재 위치 버튼 */}
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={moveToCurrentLocation}
+              className="h-12 w-12 bg-white/95 backdrop-blur-sm border-slate-200/50 shadow-lg hover:shadow-xl hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all duration-300"
+              title="현재 위치로 이동"
+            >
+              <MapPin className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         {/* Map Info Overlay */}
         <div className="absolute top-4 right-4 z-10">
