@@ -1,10 +1,13 @@
+"use client"
+
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Search, FileText, ArrowRight, Building, Train, MapIcon } from "lucide-react"
-import { createServerComponentClient } from "@/lib/supabase-server"
 import { formatPrice, formatArea } from "@/lib/utils"
+import { ListingDetailModal } from "@/components/listing/ListingDetailModal"
 
 const themeData = [
   { key: "below_market", label: "#시세이하", color: "gradient-purple text-white shadow-glow" },
@@ -21,54 +24,40 @@ const themeData = [
   { key: "new_first", label: "#신축 첫임대", color: "bg-cyan-500 text-white shadow-glow" },
 ]
 
-const areaCategories = [
-  { label: "전체", min: 0, max: 999999 },
-  { label: "50평 미만", min: 0, max: 50 },
-  { label: "50-100평", min: 50, max: 100 },
-  { label: "100-200평", min: 100, max: 200 },
-  { label: "200평 이상", min: 200, max: 999999 },
-]
 
-async function getFeaturedListings() {
-  const supabase = await createServerComponentClient()
+export default function HomePage() {
+  const [featuredListings, setFeaturedListings] = useState<any[]>([])
+  const [selectedListing, setSelectedListing] = useState<any>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select(`
-      *,
-      listing_images(path, sort_order),
-      listing_themes(
-        theme_id,
-        theme_categories(key, label_ko)
-      )
-    `)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(12)
+  useEffect(() => {
+    fetchFeaturedListings()
+  }, [])
 
-  return listings || []
-}
+  const fetchFeaturedListings = async () => {
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          limit: 12,
+          sort_by: 'created_at'
+        })
+      })
+      const data = await response.json()
+      setFeaturedListings(data.listings || [])
+    } catch (error) {
+      console.error('Failed to fetch listings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-async function getListingsByArea(minPyeong: number, maxPyeong: number) {
-  const supabase = await createServerComponentClient()
-
-  const { data: listings } = await supabase
-    .from('listings')
-    .select(`
-      *,
-      listing_images(path, sort_order)
-    `)
-    .eq('status', 'active')
-    .gte('pyeong_exclusive', minPyeong)
-    .lte('pyeong_exclusive', maxPyeong)
-    .order('created_at', { ascending: false })
-    .limit(6)
-
-  return listings || []
-}
-
-export default async function HomePage() {
-  const featuredListings = await getFeaturedListings()
+  const handleListingClick = (listing: any) => {
+    setSelectedListing(listing)
+    setShowDetailModal(true)
+  }
 
   return (
     <div className="min-h-screen">
@@ -257,9 +246,12 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredListings.slice(0, 8).map((listing: any, index: number) => (
-              <Link key={listing.id} href={`/listing/${listing.id}`}>
-                <Card className="group relative overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-105 glass border-white/50 h-full animate-scale-in"
-                      style={{ animationDelay: `${index * 100}ms` }}>
+              <Card 
+                key={listing.id}
+                className="group relative overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-500 hover:scale-105 glass border-white/50 h-full animate-scale-in cursor-pointer"
+                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => handleListingClick(listing)}
+              >
                   <div className="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <img
@@ -288,10 +280,10 @@ export default async function HomePage() {
                   <CardContent className="space-y-3">
                     <div className="font-bold text-xl text-slate-800">
                       <span className="text-blue-600">{formatPrice(listing.price_deposit)}</span>
-                      <span className="text-sm text-slate-500 ml-1">만원</span>
+                      <span className="text-sm text-slate-500 ml-1">{listing.price_deposit < 10000 ? '만원' : ''}</span>
                       {listing.price_monthly && (
                         <div className="text-sm text-slate-600 font-normal">
-                          월세 {formatPrice(listing.price_monthly)}만원
+                          월세 {formatPrice(listing.price_monthly)}{listing.price_monthly < 10000 ? '만원' : ''}
                         </div>
                       )}
                     </div>
@@ -304,7 +296,6 @@ export default async function HomePage() {
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
             ))}
           </div>
 
@@ -318,63 +309,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Area-based Listings */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-              <span className="text-indigo-600">평형별</span> 최신 매물
-            </h2>
-            <p className="text-xl text-slate-600">원하시는 면적의 매물을 찾아보세요</p>
-          </div>
 
-          <div className="space-y-8">
-            {areaCategories.map(async (category) => {
-              const listings = await getListingsByArea(category.min, category.max)
-
-              if (listings.length === 0) return null
-
-              return (
-                <div key={category.label}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">{category.label}</h3>
-                    <Link href={`/list?min_pyeong=${category.min}&max_pyeong=${category.max}`}>
-                      <Button variant="ghost" size="sm">
-                        전체보기 <ArrowRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {listings.map((listing: any) => (
-                      <Link key={listing.id} href={`/listing/${listing.id}`}>
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="aspect-square bg-gray-200 relative overflow-hidden">
-                            <img
-                              src={`https://via.placeholder.com/200x200`}
-                              alt={listing.title}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                          <CardContent className="p-3">
-                            <p className="font-semibold text-sm line-clamp-1">{listing.title}</p>
-                            <p className="text-xs text-gray-600 mt-1">
-                              {formatArea(listing.exclusive_m2)}
-                            </p>
-                            <p className="text-sm font-semibold mt-1">
-                              {formatPrice(listing.price_deposit)}만원
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+      {/* Listing Detail Modal */}
+      <ListingDetailModal
+        listing={selectedListing}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+      />
     </div>
   )
 }
