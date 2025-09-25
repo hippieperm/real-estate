@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerComponentClient()
-    const listingId = params.id
+    const { id: listingId } = await params
 
     const { data: listing, error } = await supabase
       .from('listings')
@@ -44,11 +45,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerComponentClient()
-    const listingId = params.id
+    const supabase = createAdminClient()
+    const { id: listingId } = await params
     const body = await request.json()
 
     const {
@@ -59,7 +60,7 @@ export async function PUT(
       price_monthly,
       exclusive_m2,
       floor,
-      building_floor,
+      floors_total,
       address_road,
       address_jibun,
       address_detail,
@@ -69,15 +70,15 @@ export async function PUT(
     } = body
 
     // 필수 필드 검증
-    if (!title || !property_type || !price_deposit || !exclusive_m2 || !floor || !address_road) {
+    if (!title || !property_type || price_deposit === null || price_deposit === undefined || !exclusive_m2 || floor === null || floor === undefined || !address_road || !latitude || !longitude) {
       return NextResponse.json(
         { error: '필수 필드가 누락되었습니다' },
         { status: 400 }
       )
     }
 
-    // pyeong 계산 (㎡ / 3.305785)
-    const pyeong_exclusive = exclusive_m2 / 3.305785
+    // Create location point
+    const locationPoint = `POINT(${longitude} ${latitude})`
 
     // 매물 업데이트
     const { data: listing, error } = await supabase
@@ -89,14 +90,11 @@ export async function PUT(
         price_deposit,
         price_monthly,
         exclusive_m2,
-        pyeong_exclusive,
         floor,
-        building_floor,
+        floors_total,
         address_road,
         address_jibun,
-        address_detail,
-        latitude,
-        longitude,
+        location: locationPoint,
         status,
         updated_at: new Date().toISOString()
       })
@@ -128,11 +126,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerComponentClient()
-    const listingId = params.id
+    const supabase = createAdminClient()
+    const { id: listingId } = await params
 
     // 연관된 데이터 먼저 삭제 (이미지, 테마 등)
     await supabase
