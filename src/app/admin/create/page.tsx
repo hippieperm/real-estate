@@ -407,7 +407,7 @@ export default function CreateListingPage() {
                 <div className="group">
                   <Label htmlFor="price_deposit" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    💰 보증금 (만원)
+                    💰 보증금
                     <span className="text-red-500 text-lg">*</span>
                   </Label>
                   <Input
@@ -423,7 +423,7 @@ export default function CreateListingPage() {
                 <div className="group">
                   <Label htmlFor="price_monthly" className="text-base font-bold text-slate-800 mb-4 block flex items-center gap-3">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    📅 월세 (만원)
+                    📅 월세
                     <span className="text-xs text-slate-500 font-normal">(선택사항)</span>
                   </Label>
                   <Input
