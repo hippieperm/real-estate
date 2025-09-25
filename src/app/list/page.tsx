@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { formatPrice, formatArea } from "@/lib/utils";
 import Link from "next/link";
+import { ListingDetailModal } from "@/components/listing/ListingDetailModal";
 
 const sortOptions = [
   { value: "created_at", label: "최신순", icon: Calendar },
@@ -63,6 +64,8 @@ export default function ListSearchPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [filters, setFilters] = useState({
     query: searchParams.get("query") || "",
@@ -489,8 +492,13 @@ export default function ListSearchPage() {
                   className="animate-fade-in-up group"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Link href={`/listing/${listing.id}`}>
-                    <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] bg-white/90 backdrop-blur-sm group-hover:bg-white">
+                  <Card 
+                    className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] bg-white/90 backdrop-blur-sm group-hover:bg-white cursor-pointer"
+                    onClick={() => {
+                      setSelectedListing(listing);
+                      setShowDetailModal(true);
+                    }}
+                  >
                       {viewMode === "grid" ? (
                         <>
                           {/* Image Section */}
@@ -641,7 +649,6 @@ export default function ListSearchPage() {
                         </div>
                       )}
                     </Card>
-                  </Link>
                 </div>
               ))}
             </div>
@@ -675,6 +682,13 @@ export default function ListSearchPage() {
           </>
         )}
       </div>
+
+      {/* Listing Detail Modal */}
+      <ListingDetailModal
+        listing={selectedListing}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+      />
     </div>
   );
 }
