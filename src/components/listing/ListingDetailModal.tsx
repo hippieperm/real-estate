@@ -191,20 +191,20 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
 
                   {/* Property Details */}
                   <div className="grid grid-cols-3 gap-4">
-                    <Card className="p-4 text-center">
-                      <Square className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                      <div className="text-sm text-slate-500">전용면적</div>
-                      <div className="font-semibold">{formatArea(listing.exclusive_m2)}</div>
+                    <Card className="p-4 text-center bg-gradient-to-b from-blue-50 to-blue-100 border-blue-200">
+                      <Square className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                      <div className="text-sm text-blue-700">전용면적</div>
+                      <div className="font-semibold text-slate-800">{formatArea(listing.exclusive_m2)}</div>
                     </Card>
-                    <Card className="p-4 text-center">
-                      <Building2 className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                      <div className="text-sm text-slate-500">층수</div>
-                      <div className="font-semibold">{listing.floor}층</div>
+                    <Card className="p-4 text-center bg-gradient-to-b from-green-50 to-green-100 border-green-200">
+                      <Building2 className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                      <div className="text-sm text-green-700">층수</div>
+                      <div className="font-semibold text-slate-800">{listing.floor}층</div>
                     </Card>
-                    <Card className="p-4 text-center">
-                      <Calendar className="h-6 w-6 text-purple-500 mx-auto mb-2" />
-                      <div className="text-sm text-slate-500">준공년도</div>
-                      <div className="font-semibold">2018년</div>
+                    <Card className="p-4 text-center bg-gradient-to-b from-purple-50 to-purple-100 border-purple-200">
+                      <Calendar className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                      <div className="text-sm text-purple-700">준공년도</div>
+                      <div className="font-semibold text-slate-800">2018년</div>
                     </Card>
                   </div>
                 </div>
