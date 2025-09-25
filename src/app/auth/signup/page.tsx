@@ -5,10 +5,13 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserPlus, Mail, Lock, Eye, EyeOff, Building2, ArrowRight, CheckCircle, User, Phone } from "lucide-react"
+import { SuccessModal } from "@/components/ui/success-modal"
+import { ErrorModal } from "@/components/ui/error-modal"
 
 const signupSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
@@ -48,6 +51,11 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [phoneValue, setPhoneValue] = useState("")
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [errorTitle, setErrorTitle] = useState("")
+  const router = useRouter()
 
   const {
     register,
@@ -93,15 +101,29 @@ export default function SignupPage() {
         throw new Error(result.error || '회원가입에 실패했습니다')
       }
 
-      alert("회원가입이 완료되었습니다!")
-      window.location.href = "/auth/login"
+      setShowSuccessModal(true)
     } catch (error) {
       console.error("Signup error:", error)
       if (error instanceof Error) {
-        alert(error.message)
+        // 특정 오류 메시지 처리
+        if (error.message.includes("이미 사용")) {
+          setErrorTitle("이미 가입된 이메일")
+          setErrorMessage("해당 이메일로 이미 가입되어 있습니다. 로그인하시거나 비밀번호 찾기를 이용해주세요.")
+        } else if (error.message.includes("비밀번호")) {
+          setErrorTitle("비밀번호 오류")
+          setErrorMessage("비밀번호가 보안 요구사항을 충족하지 않습니다. 8자 이상의 대소문자, 숫자, 특수문자를 포함해주세요.")
+        } else if (error.message.includes("네트워크")) {
+          setErrorTitle("네트워크 오류")
+          setErrorMessage("인터넷 연결을 확인하고 다시 시도해주세요.")
+        } else {
+          setErrorTitle("회원가입 실패")
+          setErrorMessage(error.message)
+        }
       } else {
-        alert("회원가입에 실패했습니다. 다시 시도해주세요.")
+        setErrorTitle("회원가입 오류")
+        setErrorMessage("예상치 못한 문제가 발생했습니다. 잠시 후 다시 시도해주세요.")
       }
+      setShowErrorModal(true)
     } finally {
       setIsLoading(false)
     }
@@ -386,6 +408,36 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+      
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="회원가입 완료! 🎉"
+        message="알파카 리스의 회원이 되신 것을 진심으로 환영합니다! 이제 모든 서비스를 자유롭게 이용하실 수 있습니다."
+        confirmText="로그인하러 가기"
+        onConfirm={() => router.push("/auth/login")}
+        showConfetti={true}
+      />
+      
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title={errorTitle}
+        message={errorMessage}
+        type="error"
+        showRetryButton={true}
+        retryText="다시 시도"
+        onRetry={() => {
+          setShowErrorModal(false)
+          // 폼 재제출 시도
+          const form = document.querySelector('form')
+          if (form) {
+            form.requestSubmit()
+          }
+        }}
+      />
     </div>
   )
 }
