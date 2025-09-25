@@ -340,14 +340,14 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 gap-2"
+                  className="flex-1 h-12 gap-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
                 >
                   <Phone className="h-4 w-4" />
                   전화 문의
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 gap-2"
+                  className="flex-1 h-12 gap-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300"
                 >
                   <MessageSquare className="h-4 w-4" />
                   메시지
