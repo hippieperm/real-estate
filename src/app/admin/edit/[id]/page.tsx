@@ -81,7 +81,7 @@ export default function EditListingPage() {
           longitude: listing.longitude,
           address_road: listing.address_road,
           address_jibun: listing.address_jibun,
-          location: listing.location
+          location: listing.location,
         });
 
         const formDataToSet = {
@@ -171,9 +171,10 @@ export default function EditListingPage() {
     e.preventDefault();
 
     // 위치 정보 검증 (더 유연하게)
-    const hasValidCoordinates = formData.latitude && 
-      formData.longitude && 
-      formData.latitude !== "" && 
+    const hasValidCoordinates =
+      formData.latitude &&
+      formData.longitude &&
+      formData.latitude !== "" &&
       formData.longitude !== "" &&
       !isNaN(Number(formData.latitude)) &&
       !isNaN(Number(formData.longitude)) &&
@@ -634,9 +635,7 @@ export default function EditListingPage() {
                       📍 {formData.address_road}
                     </div>
                   ) : (
-                    <div className="text-sm text-gray-500">
-                      주소 정보 없음
-                    </div>
+                    <div className="text-sm text-gray-500">주소 정보 없음</div>
                   )}
                   {formData.address_jibun && (
                     <div className="text-xs text-blue-700 mt-1">
@@ -652,11 +651,13 @@ export default function EditListingPage() {
                       ❌ 좌표 정보 없음
                     </div>
                   )}
-                  {!formData.address_road && formData.latitude && formData.longitude && (
-                    <div className="text-sm font-medium text-orange-700 mt-2">
-                      ⚠️ 주소 정보가 없습니다. 위치를 다시 선택해주세요.
-                    </div>
-                  )}
+                  {!formData.address_road &&
+                    formData.latitude &&
+                    formData.longitude && (
+                      <div className="text-sm font-medium text-orange-700 mt-2">
+                        ⚠️ 주소 정보가 없습니다. 위치를 다시 선택해주세요.
+                      </div>
+                    )}
                 </div>
               </div>
 
