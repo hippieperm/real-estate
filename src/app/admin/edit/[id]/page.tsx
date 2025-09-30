@@ -66,6 +66,8 @@ export default function EditListingPage() {
         const data = await response.json()
         const listing = data.listing
         
+        console.log('Fetched listing data:', listing) // 디버깅용 로그
+        
         setFormData({
           title: listing.title || '',
           description: listing.description || '',
@@ -82,6 +84,11 @@ export default function EditListingPage() {
           longitude: listing.longitude?.toString() || '',
           status: listing.status || 'active'
         })
+        
+        // 기존 이미지 설정
+        if (listing.listing_images && listing.listing_images.length > 0) {
+          setExistingImages(listing.listing_images.map((img: any) => img.path))
+        }
       } else {
         showError('오류', '매물을 찾을 수 없습니다.')
         router.push('/admin')
@@ -143,6 +150,21 @@ export default function EditListingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // 필수 필드 검증
+    if (!formData.latitude || !formData.longitude || formData.latitude === '' || formData.longitude === '') {
+      showError('오류', '위치 정보를 선택해주세요.')
+      return
+    }
+    
+    // 좌표 유효성 검증
+    const lat = Number(formData.latitude)
+    const lng = Number(formData.longitude)
+    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+      showError('오류', '유효한 위치 정보를 선택해주세요.')
+      return
+    }
+
     setSaving(true)
 
     try {
@@ -166,8 +188,8 @@ export default function EditListingPage() {
           exclusive_m2: cleanPrice(formData.exclusive_m2),
           floor: cleanPrice(formData.floor),
           floors_total: cleanPrice(formData.building_floor),
-          latitude: formData.latitude ? Number(formData.latitude) : null,
-          longitude: formData.longitude ? Number(formData.longitude) : null,
+          latitude: formData.latitude && formData.latitude !== '' ? Number(formData.latitude) : null,
+          longitude: formData.longitude && formData.longitude !== '' ? Number(formData.longitude) : null,
         })
       })
 
@@ -486,20 +508,31 @@ export default function EditListingPage() {
                 <LocationPicker
                   onLocationSelect={handleLocationSelect}
                   initialAddress={formData.address_road}
+                  initialLatitude={formData.latitude ? Number(formData.latitude) : undefined}
+                  initialLongitude={formData.longitude ? Number(formData.longitude) : undefined}
                 />
-                {formData.address_road && (
+                {(formData.address_road || (formData.latitude && formData.longitude)) && (
                   <div className="mt-3 p-3 bg-blue-50 rounded-xl">
-                    <div className="text-sm font-medium text-blue-900">
-                      📍 {formData.address_road}
-                    </div>
+                    {formData.address_road && (
+                      <div className="text-sm font-medium text-blue-900">
+                        📍 {formData.address_road}
+                      </div>
+                    )}
                     {formData.address_jibun && (
                       <div className="text-xs text-blue-700 mt-1">
                         지번: {formData.address_jibun}
                       </div>
                     )}
-                    <div className="text-xs text-blue-600 mt-1">
-                      좌표: {formData.latitude}, {formData.longitude}
-                    </div>
+                    {formData.latitude && formData.longitude && (
+                      <div className="text-xs text-blue-600 mt-1">
+                        좌표: {formData.latitude}, {formData.longitude}
+                      </div>
+                    )}
+                    {!formData.address_road && formData.latitude && formData.longitude && (
+                      <div className="text-sm font-medium text-orange-700">
+                        ⚠️ 주소 정보가 없습니다. 위치를 다시 선택해주세요.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

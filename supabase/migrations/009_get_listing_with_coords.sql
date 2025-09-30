@@ -1,0 +1,73 @@
+-- RPC 함수: 좌표를 포함한 매물 정보 조회
+CREATE OR REPLACE FUNCTION get_listing_with_coords(listing_id UUID)
+RETURNS TABLE(
+    id UUID,
+    code TEXT,
+    title TEXT,
+    description TEXT,
+    price_deposit BIGINT,
+    price_monthly BIGINT,
+    price_maintenance BIGINT,
+    exclusive_m2 DECIMAL,
+    supply_m2 DECIMAL,
+    floor INT,
+    floors_total INT,
+    property_type property_type,
+    status listing_status,
+    address_road TEXT,
+    address_jibun TEXT,
+    address_detail TEXT,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    near_boulevard BOOLEAN,
+    built_year INT,
+    move_in_date DATE,
+    parking_available BOOLEAN,
+    parking_count INT,
+    elevator_available BOOLEAN,
+    has_cctv BOOLEAN,
+    has_security_office BOOLEAN,
+    loan_available BOOLEAN,
+    direct_deal BOOLEAN,
+    pet_allowed BOOLEAN,
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        l.id,
+        l.code,
+        l.title,
+        l.description,
+        l.price_deposit,
+        l.price_monthly,
+        l.price_maintenance,
+        l.exclusive_m2,
+        l.supply_m2,
+        l.floor,
+        l.floors_total,
+        l.property_type,
+        l.status,
+        l.address_road,
+        l.address_jibun,
+        l.address_detail,
+        ST_Y(l.location::geometry) as latitude,
+        ST_X(l.location::geometry) as longitude,
+        l.near_boulevard,
+        l.built_year,
+        l.move_in_date,
+        l.parking_available,
+        l.parking_count,
+        l.elevator_available,
+        l.has_cctv,
+        l.has_security_office,
+        l.loan_available,
+        l.direct_deal,
+        l.pet_allowed,
+        l.created_at,
+        l.updated_at
+    FROM listings l
+    WHERE l.id = listing_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

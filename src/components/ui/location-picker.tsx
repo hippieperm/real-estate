@@ -12,10 +12,18 @@ interface LocationPickerProps {
     jibunAddress?: string
   }) => void
   initialAddress?: string
+  initialLatitude?: number
+  initialLongitude?: number
   className?: string
 }
 
-export function LocationPicker({ onLocationSelect, initialAddress = '', className }: LocationPickerProps) {
+export function LocationPicker({ 
+  onLocationSelect, 
+  initialAddress = '', 
+  initialLatitude, 
+  initialLongitude, 
+  className 
+}: LocationPickerProps) {
 
 
 
