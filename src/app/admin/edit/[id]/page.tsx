@@ -1,185 +1,205 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { LocationPicker } from "@/components/ui/location-picker"
-import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
-import { 
-  ArrowLeft, 
-  Save, 
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { LocationPicker } from "@/components/ui/location-picker";
+import {
+  NotificationModal,
+  useNotificationModal,
+} from "@/components/ui/notification-modal";
+import {
+  ArrowLeft,
+  Save,
   Building2,
   MapPin,
   DollarSign,
   Square,
   Upload,
-  Loader
-} from "lucide-react"
-import Link from "next/link"
+  Loader,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function EditListingPage() {
-  const router = useRouter()
-  const params = useParams()
-  const listingId = params.id as string
-  const { modal, closeModal, showSuccess, showError } = useNotificationModal()
-  
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [uploadingImages, setUploadingImages] = useState(false)
-  const [selectedImages, setSelectedImages] = useState<File[]>([])
-  const [existingImages, setExistingImages] = useState<string[]>([])
+  const router = useRouter();
+  const params = useParams();
+  const listingId = params.id as string;
+  const { modal, closeModal, showSuccess, showError } = useNotificationModal();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    property_type: '',
-    price_deposit: '',
-    price_monthly: '',
-    exclusive_m2: '',
-    floor: '',
-    building_floor: '',
-    address_road: '',
-    address_jibun: '',
-    address_detail: '',
-    latitude: '',
-    longitude: '',
-    status: 'active'
-  })
+    title: "",
+    description: "",
+    property_type: "",
+    price_deposit: "",
+    price_monthly: "",
+    exclusive_m2: "",
+    floor: "",
+    building_floor: "",
+    address_road: "",
+    address_jibun: "",
+    address_detail: "",
+    latitude: "",
+    longitude: "",
+    status: "active",
+  });
 
   useEffect(() => {
     if (listingId) {
-      fetchListing()
+      fetchListing();
     }
-  }, [listingId])
+  }, [listingId]);
 
   const fetchListing = async () => {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/listings/${listingId}`)
-      
+      setLoading(true);
+      const response = await fetch(`/api/listings/${listingId}`);
+
       if (response.ok) {
-        const data = await response.json()
-        const listing = data.listing
-        
-        console.log('Fetched listing data:', listing) // 디버깅용 로그
-        
-        setFormData({
-          title: listing.title || '',
-          description: listing.description || '',
-          property_type: listing.property_type || '',
-          price_deposit: listing.price_deposit?.toString() || '',
-          price_monthly: listing.price_monthly?.toString() || '',
-          exclusive_m2: listing.exclusive_m2?.toString() || '',
-          floor: listing.floor?.toString() || '',
-          building_floor: listing.floors_total?.toString() || '',
-          address_road: listing.address_road || '',
-          address_jibun: listing.address_jibun || '',
-          address_detail: listing.address_detail || '',
-          latitude: listing.latitude?.toString() || '',
-          longitude: listing.longitude?.toString() || '',
-          status: listing.status || 'active'
-        })
-        
+        const data = await response.json();
+        const listing = data.listing;
+
+        console.log("Fetched listing data:", listing); // 디버깅용 로그
+        console.log("Location data:", {
+          latitude: listing.latitude,
+          longitude: listing.longitude,
+          address_road: listing.address_road,
+          address_jibun: listing.address_jibun,
+          location: listing.location
+        });
+
+        const formDataToSet = {
+          title: listing.title || "",
+          description: listing.description || "",
+          property_type: listing.property_type || "",
+          price_deposit: listing.price_deposit?.toString() || "",
+          price_monthly: listing.price_monthly?.toString() || "",
+          exclusive_m2: listing.exclusive_m2?.toString() || "",
+          floor: listing.floor?.toString() || "",
+          building_floor: listing.floors_total?.toString() || "",
+          address_road: listing.address_road || "",
+          address_jibun: listing.address_jibun || "",
+          address_detail: listing.address_detail || "",
+          latitude: listing.latitude?.toString() || "",
+          longitude: listing.longitude?.toString() || "",
+          status: listing.status || "active",
+        };
+
+        console.log("Setting form data:", formDataToSet);
+        setFormData(formDataToSet);
+
         // 기존 이미지 설정
         if (listing.listing_images && listing.listing_images.length > 0) {
-          setExistingImages(listing.listing_images.map((img: any) => img.path))
+          setExistingImages(listing.listing_images.map((img: any) => img.path));
         }
       } else {
-        showError('오류', '매물을 찾을 수 없습니다.')
-        router.push('/admin')
+        showError("오류", "매물을 찾을 수 없습니다.");
+        router.push("/admin");
       }
     } catch (error) {
-      console.error('Fetch error:', error)
-      showError('오류', '매물 정보를 불러오는 중 오류가 발생했습니다.')
-      router.push('/admin')
+      console.error("Fetch error:", error);
+      showError("오류", "매물 정보를 불러오는 중 오류가 발생했습니다.");
+      router.push("/admin");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatNumber = (value: string) => {
-    const numericValue = value.replace(/,/g, '')
-    if (numericValue === '' || isNaN(Number(numericValue))) return value
-    return Number(numericValue).toLocaleString('ko-KR')
-  }
+    const numericValue = value.replace(/,/g, "");
+    if (numericValue === "" || isNaN(Number(numericValue))) return value;
+    return Number(numericValue).toLocaleString("ko-KR");
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
-    }))
-  }
+      [field]: value,
+    }));
+  };
 
   const handleNumberInputChange = (field: string, value: string) => {
-    const numericValue = value.replace(/,/g, '')
-    setFormData(prev => ({
+    const numericValue = value.replace(/,/g, "");
+    setFormData((prev) => ({
       ...prev,
-      [field]: numericValue
-    }))
-  }
+      [field]: numericValue,
+    }));
+  };
 
   const handleLocationSelect = (location: {
-    address: string
-    latitude: number
-    longitude: number
-    roadAddress?: string
-    jibunAddress?: string
+    address: string;
+    latitude: number;
+    longitude: number;
+    roadAddress?: string;
+    jibunAddress?: string;
   }) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       address_road: location.roadAddress || location.address,
-      address_jibun: location.jibunAddress || '',
+      address_jibun: location.jibunAddress || "",
       latitude: location.latitude.toString(),
-      longitude: location.longitude.toString()
-    }))
-  }
+      longitude: location.longitude.toString(),
+    }));
+  };
 
   const handleImageUpload = (files: File[]) => {
-    setSelectedImages(prev => [...prev, ...files])
-  }
+    setSelectedImages((prev) => [...prev, ...files]);
+  };
 
   const handleImageRemove = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index))
-    setExistingImages(prev => prev.filter((_, i) => i !== index))
-  }
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // 필수 필드 검증
-    if (!formData.latitude || !formData.longitude || formData.latitude === '' || formData.longitude === '') {
-      showError('오류', '위치 정보를 선택해주세요.')
-      return
-    }
-    
-    // 좌표 유효성 검증
-    const lat = Number(formData.latitude)
-    const lng = Number(formData.longitude)
-    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-      showError('오류', '유효한 위치 정보를 선택해주세요.')
-      return
+    // 위치 정보 검증 (더 유연하게)
+    const hasValidCoordinates = formData.latitude && 
+      formData.longitude && 
+      formData.latitude !== "" && 
+      formData.longitude !== "" &&
+      !isNaN(Number(formData.latitude)) &&
+      !isNaN(Number(formData.longitude)) &&
+      Number(formData.latitude) !== 0 &&
+      Number(formData.longitude) !== 0;
+
+    if (!hasValidCoordinates) {
+      showError("오류", "위치 정보를 선택해주세요.");
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
 
     try {
       // 콤마 제거 후 숫자 변환
       const cleanPrice = (value: string) => {
-        if (!value) return null
-        const cleaned = value.replace(/,/g, '')
-        const num = parseFloat(cleaned)
-        return isNaN(num) ? null : num
-      }
+        if (!value) return null;
+        const cleaned = value.replace(/,/g, "");
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? null : num;
+      };
 
       const response = await fetch(`/api/listings/${listingId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...formData,
@@ -188,25 +208,34 @@ export default function EditListingPage() {
           exclusive_m2: cleanPrice(formData.exclusive_m2),
           floor: cleanPrice(formData.floor),
           floors_total: cleanPrice(formData.building_floor),
-          latitude: formData.latitude && formData.latitude !== '' ? Number(formData.latitude) : null,
-          longitude: formData.longitude && formData.longitude !== '' ? Number(formData.longitude) : null,
-        })
-      })
+          latitude:
+            formData.latitude && formData.latitude !== ""
+              ? Number(formData.latitude)
+              : null,
+          longitude:
+            formData.longitude && formData.longitude !== ""
+              ? Number(formData.longitude)
+              : null,
+        }),
+      });
 
       if (response.ok) {
-        showSuccess('성공', '매물이 성공적으로 수정되었습니다!')
-        router.push('/admin')
+        showSuccess("성공", "매물이 성공적으로 수정되었습니다!");
+        router.push("/admin");
       } else {
-        const error = await response.json()
-        showError('수정 실패', `수정에 실패했습니다: ${error.error || error.message}`)
+        const error = await response.json();
+        showError(
+          "수정 실패",
+          `수정에 실패했습니다: ${error.error || error.message}`
+        );
       }
     } catch (error) {
-      console.error('Update error:', error)
-      showError('오류', '수정 중 오류가 발생했습니다.')
+      console.error("Update error:", error);
+      showError("오류", "수정 중 오류가 발생했습니다.");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -215,11 +244,13 @@ export default function EditListingPage() {
           <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Loader className="h-10 w-10 text-white animate-spin" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">매물 정보를 불러오는 중...</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            매물 정보를 불러오는 중...
+          </h3>
           <p className="text-gray-500">잠시만 기다려주세요</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -229,13 +260,19 @@ export default function EditListingPage() {
         <div className="max-w-5xl mx-auto px-6 py-8">
           <div className="flex items-center gap-6">
             <Link href="/admin">
-              <Button variant="outline" size="sm" className="gap-2 border-gray-400 text-gray-800 bg-white hover:bg-gray-100 font-medium shadow-sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-gray-400 text-gray-800 bg-white hover:bg-gray-100 font-medium shadow-sm"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 돌아가기
               </Button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">매물 수정</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                매물 수정
+              </h1>
               <p className="text-lg text-gray-600">매물 정보를 수정하세요</p>
             </div>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
@@ -252,18 +289,30 @@ export default function EditListingPage() {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">✓</div>
-                <span className="text-sm font-medium text-gray-900">수정모드</span>
+                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  ✓
+                </div>
+                <span className="text-sm font-medium text-gray-900">
+                  수정모드
+                </span>
               </div>
               <div className="w-16 h-px bg-orange-300"></div>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">2</div>
-                <span className="text-sm font-medium text-gray-900">정보수정</span>
+                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  2
+                </div>
+                <span className="text-sm font-medium text-gray-900">
+                  정보수정
+                </span>
               </div>
               <div className="w-16 h-px bg-gray-300"></div>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">3</div>
-                <span className="text-sm font-medium text-gray-500">저장완료</span>
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  3
+                </div>
+                <span className="text-sm font-medium text-gray-500">
+                  저장완료
+                </span>
               </div>
             </div>
           </div>
@@ -287,15 +336,18 @@ export default function EditListingPage() {
             </CardHeader>
             <CardContent className="space-y-8 relative">
               <div className="group">
-                <Label htmlFor="title" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  매물명 
+                <Label
+                  htmlFor="title"
+                  className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                >
+                  매물명
                   <span className="text-red-500">*</span>
                   <div className="w-1 h-1 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="예: 강남역 프리미엄 오피스"
                   required
                   className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
@@ -303,14 +355,19 @@ export default function EditListingPage() {
               </div>
 
               <div className="group">
-                <Label htmlFor="description" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                <Label
+                  htmlFor="description"
+                  className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                >
                   매물 설명
                   <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                   placeholder="매물에 대한 자세한 설명을 입력하세요"
                   rows={4}
                   className="border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
@@ -319,12 +376,21 @@ export default function EditListingPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
-                  <Label htmlFor="property_type" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    매물 유형 
+                  <Label
+                    htmlFor="property_type"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
+                    매물 유형
                     <span className="text-red-500">*</span>
                     <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
-                  <Select value={formData.property_type} onValueChange={(value) => handleInputChange('property_type', value)} required>
+                  <Select
+                    value={formData.property_type}
+                    onValueChange={(value) =>
+                      handleInputChange("property_type", value)
+                    }
+                    required
+                  >
                     <SelectTrigger className="h-12 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
                       <SelectValue placeholder="매물 유형을 선택하세요" />
                     </SelectTrigger>
@@ -338,11 +404,19 @@ export default function EditListingPage() {
                 </div>
 
                 <div className="group">
-                  <Label htmlFor="status" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label
+                    htmlFor="status"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
                     상태
                     <div className="w-1 h-1 bg-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      handleInputChange("status", value)
+                    }
+                  >
                     <SelectTrigger className="h-12 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
                       <SelectValue />
                     </SelectTrigger>
@@ -377,8 +451,11 @@ export default function EditListingPage() {
             <CardContent className="space-y-8 relative">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
-                  <Label htmlFor="price_deposit" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    💰 보증금 (만원) 
+                  <Label
+                    htmlFor="price_deposit"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
+                    💰 보증금 (만원)
                     <span className="text-red-500">*</span>
                     <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
@@ -386,22 +463,33 @@ export default function EditListingPage() {
                     id="price_deposit"
                     type="text"
                     value={formatNumber(formData.price_deposit)}
-                    onChange={(e) => handleNumberInputChange('price_deposit', e.target.value)}
+                    onChange={(e) =>
+                      handleNumberInputChange("price_deposit", e.target.value)
+                    }
                     placeholder="10,000"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="price_monthly" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label
+                    htmlFor="price_monthly"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
                     📅 월세 (만원)
                     <div className="w-1 h-1 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
                   <Input
                     id="price_monthly"
                     type="text"
-                    value={formData.price_monthly ? formatNumber(formData.price_monthly) : ''}
-                    onChange={(e) => handleNumberInputChange('price_monthly', e.target.value)}
+                    value={
+                      formData.price_monthly
+                        ? formatNumber(formData.price_monthly)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleNumberInputChange("price_monthly", e.target.value)
+                    }
                     placeholder="300"
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
@@ -431,47 +519,69 @@ export default function EditListingPage() {
             <CardContent className="space-y-8 relative">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="group">
-                  <Label htmlFor="exclusive_m2" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    📐 전용면적 (㎡) 
+                  <Label
+                    htmlFor="exclusive_m2"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
+                    📐 전용면적 (㎡)
                     <span className="text-red-500">*</span>
                     <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
                   <Input
                     id="exclusive_m2"
                     type="text"
-                    value={formData.exclusive_m2 ? formatNumber(formData.exclusive_m2) : ''}
-                    onChange={(e) => handleNumberInputChange('exclusive_m2', e.target.value)}
+                    value={
+                      formData.exclusive_m2
+                        ? formatNumber(formData.exclusive_m2)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleNumberInputChange("exclusive_m2", e.target.value)
+                    }
                     placeholder="165.3"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="floor" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                    🏢 해당 층 
-                    <span className="text-red-500">*</span>
+                  <Label
+                    htmlFor="floor"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
+                    🏢 해당 층<span className="text-red-500">*</span>
                     <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
                   <Input
                     id="floor"
                     type="text"
-                    value={formData.floor ? formatNumber(formData.floor) : ''}
-                    onChange={(e) => handleNumberInputChange('floor', e.target.value)}
+                    value={formData.floor ? formatNumber(formData.floor) : ""}
+                    onChange={(e) =>
+                      handleNumberInputChange("floor", e.target.value)
+                    }
                     placeholder="15"
                     required
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
                 </div>
                 <div className="group">
-                  <Label htmlFor="building_floor" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                  <Label
+                    htmlFor="building_floor"
+                    className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                  >
                     🏯️ 건물 총 층수
                     <div className="w-1 h-1 bg-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Label>
                   <Input
                     id="building_floor"
                     type="text"
-                    value={formData.building_floor ? formatNumber(formData.building_floor) : ''}
-                    onChange={(e) => handleNumberInputChange('building_floor', e.target.value)}
+                    value={
+                      formData.building_floor
+                        ? formatNumber(formData.building_floor)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleNumberInputChange("building_floor", e.target.value)
+                    }
                     placeholder="20"
                     className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                   />
@@ -501,51 +611,69 @@ export default function EditListingPage() {
             <CardContent className="space-y-8 relative">
               <div className="group">
                 <Label className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
-                  🗺️ 위치 선택 
+                  🗺️ 위치 선택
                   <span className="text-red-500">*</span>
                   <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
                 <LocationPicker
                   onLocationSelect={handleLocationSelect}
                   initialAddress={formData.address_road}
-                  initialLatitude={formData.latitude ? Number(formData.latitude) : undefined}
-                  initialLongitude={formData.longitude ? Number(formData.longitude) : undefined}
+                  initialLatitude={
+                    formData.latitude ? Number(formData.latitude) : undefined
+                  }
+                  initialLongitude={
+                    formData.longitude ? Number(formData.longitude) : undefined
+                  }
                 />
-                {(formData.address_road || (formData.latitude && formData.longitude)) && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-xl">
-                    {formData.address_road && (
-                      <div className="text-sm font-medium text-blue-900">
-                        📍 {formData.address_road}
-                      </div>
-                    )}
-                    {formData.address_jibun && (
-                      <div className="text-xs text-blue-700 mt-1">
-                        지번: {formData.address_jibun}
-                      </div>
-                    )}
-                    {formData.latitude && formData.longitude && (
-                      <div className="text-xs text-blue-600 mt-1">
-                        좌표: {formData.latitude}, {formData.longitude}
-                      </div>
-                    )}
-                    {!formData.address_road && formData.latitude && formData.longitude && (
-                      <div className="text-sm font-medium text-orange-700">
-                        ⚠️ 주소 정보가 없습니다. 위치를 다시 선택해주세요.
-                      </div>
-                    )}
+                <div className="mt-3 p-3 bg-gray-50 rounded-xl">
+                  <div className="text-sm font-medium text-gray-700 mb-2">
+                    현재 위치 정보:
                   </div>
-                )}
+                  {formData.address_road ? (
+                    <div className="text-sm font-medium text-blue-900">
+                      📍 {formData.address_road}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      주소 정보 없음
+                    </div>
+                  )}
+                  {formData.address_jibun && (
+                    <div className="text-xs text-blue-700 mt-1">
+                      지번: {formData.address_jibun}
+                    </div>
+                  )}
+                  {formData.latitude && formData.longitude ? (
+                    <div className="text-xs text-green-600 mt-1">
+                      ✅ 좌표: {formData.latitude}, {formData.longitude}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-red-600 mt-1">
+                      ❌ 좌표 정보 없음
+                    </div>
+                  )}
+                  {!formData.address_road && formData.latitude && formData.longitude && (
+                    <div className="text-sm font-medium text-orange-700 mt-2">
+                      ⚠️ 주소 정보가 없습니다. 위치를 다시 선택해주세요.
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="group">
-                <Label htmlFor="address_detail" className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2">
+                <Label
+                  htmlFor="address_detail"
+                  className="text-sm font-semibold text-gray-800 mb-3 block flex items-center gap-2"
+                >
                   🏢 상세 주소 (동/호수)
                   <div className="w-1 h-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Label>
                 <Input
                   id="address_detail"
                   value={formData.address_detail}
-                  onChange={(e) => handleInputChange('address_detail', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("address_detail", e.target.value)
+                  }
                   placeholder="15층 1501호"
                   className="h-12 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                 />
@@ -581,7 +709,9 @@ export default function EditListingPage() {
               {uploadingImages && (
                 <div className="mt-6 flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-xl">
                   <div className="w-5 h-5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
-                  <span className="text-sm text-blue-700 font-medium">이미지 업로드 중...</span>
+                  <span className="text-sm text-blue-700 font-medium">
+                    이미지 업로드 중...
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -594,9 +724,9 @@ export default function EditListingPage() {
             </div>
             <div className="flex gap-4">
               <Link href="/admin">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="h-12 px-8 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
                 >
                   취소
@@ -623,7 +753,7 @@ export default function EditListingPage() {
           </div>
         </form>
       </div>
-      
+
       <NotificationModal
         isOpen={modal.isOpen}
         onClose={closeModal}
@@ -633,5 +763,5 @@ export default function EditListingPage() {
         onConfirm={modal.onConfirm}
       />
     </div>
-  )
+  );
 }
