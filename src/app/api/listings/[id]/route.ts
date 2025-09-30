@@ -74,7 +74,7 @@ export async function GET(
       if (!latitude || !longitude) {
         console.log("No coordinates found, using default Seoul coordinates");
         latitude = 37.5665; // 서울시청 위도
-        longitude = 126.9780; // 서울시청 경도
+        longitude = 126.978; // 서울시청 경도
       }
 
       console.log("Extracted coordinates:", { latitude, longitude });
