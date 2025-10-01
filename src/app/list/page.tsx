@@ -44,7 +44,12 @@ const sortOptions = [
 const propertyTypes = [
   { value: "office", label: "사무실", icon: Briefcase, color: "blue" },
   { value: "retail", label: "상가", icon: Store, color: "green" },
-  { value: "whole_building", label: "통건물", icon: Building2, color: "purple" },
+  {
+    value: "whole_building",
+    label: "통건물",
+    icon: Building2,
+    color: "purple",
+  },
   { value: "residential", label: "주택형", icon: Home, color: "orange" },
 ];
 
@@ -72,18 +77,29 @@ export default function ListSearchPage() {
     query: searchParams.get("query") || "",
     property_type: searchParams.get("property_type")?.split(",") || [],
     min_deposit: Number(searchParams.get("min_deposit")) || 0,
-    max_deposit: Number(searchParams.get("max_deposit")) || 100000,
+    max_deposit: Number(searchParams.get("max_deposit")) || 1000000,
     min_monthly: Number(searchParams.get("min_monthly")) || 0,
-    max_monthly: Number(searchParams.get("max_monthly")) || 10000,
+    max_monthly: Number(searchParams.get("max_monthly")) || 100000,
     min_pyeong: Number(searchParams.get("min_pyeong")) || 0,
-    max_pyeong: Number(searchParams.get("max_pyeong")) || 500,
+    max_pyeong: Number(searchParams.get("max_pyeong")) || 10000,
     sort_by: searchParams.get("sort_by") || "created_at",
-    stations: searchParams.get("stations") ? [Number(searchParams.get("stations"))] : [],
+    stations: searchParams.get("stations")
+      ? [Number(searchParams.get("stations"))]
+      : [],
   });
 
-  const [depositRange, setDepositRange] = useState([filters.min_deposit, filters.max_deposit]);
-  const [monthlyRange, setMonthlyRange] = useState([filters.min_monthly, filters.max_monthly]);
-  const [pyeongRange, setPyeongRange] = useState([filters.min_pyeong, filters.max_pyeong]);
+  const [depositRange, setDepositRange] = useState([
+    filters.min_deposit,
+    filters.max_deposit,
+  ]);
+  const [monthlyRange, setMonthlyRange] = useState([
+    filters.min_monthly,
+    filters.max_monthly,
+  ]);
+  const [pyeongRange, setPyeongRange] = useState([
+    filters.min_pyeong,
+    filters.max_pyeong,
+  ]);
 
   useEffect(() => {
     searchListings();
@@ -124,6 +140,12 @@ export default function ListSearchPage() {
       });
 
       const data = await response.json();
+      console.log("List page search results:", {
+        response: response.status,
+        data,
+        listingsCount: data.listings?.length,
+        total: data.total,
+      });
 
       if (page === 1) {
         setListings(data.listings || []);
@@ -149,7 +171,7 @@ export default function ListSearchPage() {
   };
 
   const toggleFavorite = (id: string) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(id)) {
         newFavorites.delete(id);
@@ -177,17 +199,17 @@ export default function ListSearchPage() {
       query: "",
       property_type: [],
       min_deposit: 0,
-      max_deposit: 100000,
+      max_deposit: 1000000,
       min_monthly: 0,
-      max_monthly: 10000,
+      max_monthly: 100000,
       min_pyeong: 0,
-      max_pyeong: 500,
+      max_pyeong: 10000,
       sort_by: "created_at",
     };
     setFilters(resetState);
-    setDepositRange([0, 100000]);
-    setMonthlyRange([0, 10000]);
-    setPyeongRange([0, 500]);
+    setDepositRange([0, 1000000]);
+    setMonthlyRange([0, 100000]);
+    setPyeongRange([0, 10000]);
   };
 
   return (
@@ -195,8 +217,14 @@ export default function ListSearchPage() {
       {/* Animated Background Elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-emerald-400/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+        <div
+          className="absolute top-40 right-20 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute bottom-20 left-1/4 w-80 h-80 bg-emerald-400/5 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: "4s" }}
+        ></div>
       </div>
 
       {/* Modern Hero Header */}
@@ -207,33 +235,49 @@ export default function ListSearchPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               {stationInfo ? (
                 <>
-                  <span className="inline-block animate-fade-in-up">{stationInfo.name}</span>
+                  <span className="inline-block animate-fade-in-up">
+                    {stationInfo.name}
+                  </span>
                   <br />
-                  <span className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" style={{ animationDelay: '0.2s' }}>
+                  <span
+                    className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent"
+                    style={{ animationDelay: "0.2s" }}
+                  >
                     역세권 매물
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="inline-block animate-fade-in-up">완벽한 공간을</span>
+                  <span className="inline-block animate-fade-in-up">
+                    완벽한 공간을
+                  </span>
                   <br />
-                  <span className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" style={{ animationDelay: '0.2s' }}>
+                  <span
+                    className="inline-block animate-fade-in-up bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent"
+                    style={{ animationDelay: "0.2s" }}
+                  >
                     찾아보세요
                   </span>
                 </>
               )}
             </h1>
-            <p className="text-xl text-blue-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              {stationInfo ? (
-                `${stationInfo.line} ${stationInfo.name} 주변 ${total.toLocaleString()}개의 프리미엄 매물`
-              ) : (
-                `${total.toLocaleString()}개의 프리미엄 매물이 기다리고 있습니다`
-              )}
+            <p
+              className="text-xl text-blue-100 animate-fade-in-up"
+              style={{ animationDelay: "0.4s" }}
+            >
+              {stationInfo
+                ? `${stationInfo.line} ${
+                    stationInfo.name
+                  } 주변 ${total.toLocaleString()}개의 프리미엄 매물`
+                : `${total.toLocaleString()}개의 프리미엄 매물이 기다리고 있습니다`}
             </p>
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="max-w-4xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <div
+            className="max-w-4xl mx-auto animate-fade-in-up"
+            style={{ animationDelay: "0.6s" }}
+          >
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
               <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
@@ -243,7 +287,9 @@ export default function ListSearchPage() {
                     <Input
                       placeholder="원하는 지역, 역, 매물명을 검색해보세요..."
                       value={filters.query}
-                      onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+                      onChange={(e) =>
+                        setFilters({ ...filters, query: e.target.value })
+                      }
                       onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                       className="h-14 pl-12 pr-4 text-lg bg-white border-2 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-xl shadow-sm text-slate-900 placeholder:text-slate-500"
                     />
@@ -269,16 +315,18 @@ export default function ListSearchPage() {
                   {quickFilters.map((filter, index) => {
                     const colors = [
                       "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200",
-                      "bg-green-100 border-green-300 text-green-700 hover:bg-green-200", 
+                      "bg-green-100 border-green-300 text-green-700 hover:bg-green-200",
                       "bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200",
-                      "bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200"
+                      "bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200",
                     ];
                     return (
                       <Button
                         key={filter.value}
                         variant="outline"
                         size="sm"
-                        className={`rounded-full transition-all duration-200 ${colors[index % colors.length]}`}
+                        className={`rounded-full transition-all duration-200 ${
+                          colors[index % colors.length]
+                        }`}
                       >
                         {filter.label}
                       </Button>
@@ -302,7 +350,11 @@ export default function ListSearchPage() {
             >
               <SlidersHorizontal className="h-4 w-4" />
               상세 필터
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
             </Button>
 
             {/* Active Filters Display */}
@@ -310,17 +362,19 @@ export default function ListSearchPage() {
               {filters.property_type.length > 0 && (
                 <Badge variant="secondary" className="px-3 py-1 rounded-full">
                   {filters.property_type.length}개 유형 선택
-                  <X 
-                    className="ml-2 h-3 w-3 cursor-pointer" 
-                    onClick={() => setFilters({ ...filters, property_type: [] })}
+                  <X
+                    className="ml-2 h-3 w-3 cursor-pointer"
+                    onClick={() =>
+                      setFilters({ ...filters, property_type: [] })
+                    }
                   />
                 </Badge>
               )}
               {filters.query && (
                 <Badge variant="secondary" className="px-3 py-1 rounded-full">
                   "{filters.query}"
-                  <X 
-                    className="ml-2 h-3 w-3 cursor-pointer" 
+                  <X
+                    className="ml-2 h-3 w-3 cursor-pointer"
                     onClick={() => setFilters({ ...filters, query: "" })}
                   />
                 </Badge>
@@ -385,7 +439,9 @@ export default function ListSearchPage() {
                     <div className="grid grid-cols-2 gap-3">
                       {propertyTypes.map((type) => {
                         const Icon = type.icon;
-                        const isSelected = filters.property_type.includes(type.value);
+                        const isSelected = filters.property_type.includes(
+                          type.value
+                        );
                         const getButtonStyles = () => {
                           if (isSelected) {
                             switch (type.color) {
@@ -424,12 +480,17 @@ export default function ListSearchPage() {
                               if (isSelected) {
                                 setFilters({
                                   ...filters,
-                                  property_type: filters.property_type.filter(t => t !== type.value)
+                                  property_type: filters.property_type.filter(
+                                    (t) => t !== type.value
+                                  ),
                                 });
                               } else {
                                 setFilters({
                                   ...filters,
-                                  property_type: [...filters.property_type, type.value]
+                                  property_type: [
+                                    ...filters.property_type,
+                                    type.value,
+                                  ],
                                 });
                               }
                             }}
@@ -454,24 +515,26 @@ export default function ListSearchPage() {
                         {/* Range Display Tooltip */}
                         <div className="flex justify-center mb-2">
                           <div className="bg-slate-800 text-white px-3 py-1 rounded-lg text-sm font-medium shadow-lg">
-                            {depositRange[0] === 0 && depositRange[1] === 100000 ? (
-                              "전체"
-                            ) : (
-                              `${formatPrice(depositRange[0])}${depositRange[0] < 10000 ? '만' : ''} ~ ${formatPrice(depositRange[1])}${depositRange[1] < 10000 ? '만' : ''}`
-                            )}
+                            {depositRange[0] === 0 && depositRange[1] === 1000000
+                              ? "전체"
+                              : `${formatPrice(depositRange[0])}${
+                                  depositRange[0] < 10000 ? "만" : ""
+                                } ~ ${formatPrice(depositRange[1])}${
+                                  depositRange[1] < 10000 ? "만" : ""
+                                }`}
                           </div>
                         </div>
                         <Slider
                           value={depositRange}
                           onValueChange={setDepositRange}
-                          max={100000}
-                          step={1000}
+                          max={1000000}
+                          step={10000}
                           className="mb-4"
                         />
                         <div className="flex justify-between text-sm text-slate-500">
                           <span>최소</span>
-                          <span>5천만</span>
-                          <span>2.5억</span>
+                          <span>25억</span>
+                          <span>50억</span>
                           <span>최대</span>
                         </div>
                       </div>
@@ -486,24 +549,26 @@ export default function ListSearchPage() {
                         {/* Range Display Tooltip */}
                         <div className="flex justify-center mb-2">
                           <div className="bg-slate-800 text-white px-3 py-1 rounded-lg text-sm font-medium shadow-lg">
-                            {monthlyRange[0] === 0 && monthlyRange[1] === 10000 ? (
-                              "전체"
-                            ) : (
-                              `${formatPrice(monthlyRange[0])}${monthlyRange[0] < 10000 ? '만' : ''} ~ ${formatPrice(monthlyRange[1])}${monthlyRange[1] < 10000 ? '만' : ''}`
-                            )}
+                            {monthlyRange[0] === 0 && monthlyRange[1] === 100000
+                              ? "전체"
+                              : `${formatPrice(monthlyRange[0])}${
+                                  monthlyRange[0] < 10000 ? "만" : ""
+                                } ~ ${formatPrice(monthlyRange[1])}${
+                                  monthlyRange[1] < 10000 ? "만" : ""
+                                }`}
                           </div>
                         </div>
                         <Slider
                           value={monthlyRange}
                           onValueChange={setMonthlyRange}
-                          max={10000}
-                          step={50}
+                          max={100000}
+                          step={1000}
                           className="mb-4"
                         />
                         <div className="flex justify-between text-sm text-slate-500">
                           <span>최소</span>
-                          <span>35만</span>
-                          <span>150만</span>
+                          <span>2,500만</span>
+                          <span>5,000만</span>
                           <span>최대</span>
                         </div>
                       </div>
@@ -520,8 +585,8 @@ export default function ListSearchPage() {
                       <Slider
                         value={pyeongRange}
                         onValueChange={setPyeongRange}
-                        max={500}
-                        step={5}
+                        max={10000}
+                        step={50}
                         className="mb-4"
                       />
                       <div className="flex justify-between text-sm text-slate-600">
@@ -542,7 +607,7 @@ export default function ListSearchPage() {
                     <X className="h-4 w-4" />
                     필터 초기화
                   </Button>
-                  
+
                   <Button
                     onClick={() => {
                       updateFiltersFromRange();
@@ -565,7 +630,9 @@ export default function ListSearchPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
               <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">검색 중...</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              검색 중...
+            </h3>
             <p className="text-slate-600">최적의 매물을 찾고 있습니다</p>
           </div>
         ) : listings.length === 0 ? (
@@ -573,182 +640,206 @@ export default function ListSearchPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
               <Search className="h-8 w-8 text-slate-400" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">검색 결과가 없습니다</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              검색 결과가 없습니다
+            </h3>
             <p className="text-slate-600 mb-6">다른 검색 조건을 시도해보세요</p>
-            <Button onClick={resetFilters} variant="outline" className="rounded-xl">
+            <Button
+              onClick={resetFilters}
+              variant="outline"
+              className="rounded-xl"
+            >
               필터 초기화
             </Button>
           </div>
         ) : (
           <>
             {/* Results Grid/List */}
-            <div className={viewMode === "grid" 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
-              : "space-y-4"
-            }>
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  : "space-y-4"
+              }
+            >
               {listings.map((listing, index) => (
-                <div 
+                <div
                   key={listing.id}
                   className="animate-fade-in-up group"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Card 
+                  <Card
                     className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] bg-white/90 backdrop-blur-sm group-hover:bg-white cursor-pointer"
                     onClick={() => {
                       setSelectedListing(listing);
                       setShowDetailModal(true);
                     }}
                   >
-                      {viewMode === "grid" ? (
-                        <>
-                          {/* Image Section */}
-                          <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
-                            <img
-                              src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop"
-                              alt={listing.title}
-                              className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+                    {viewMode === "grid" ? (
+                      <>
+                        {/* Image Section */}
+                        <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                          <img
+                            src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop"
+                            alt={listing.title}
+                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                          {/* Favorite Button */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleFavorite(listing.id);
+                            }}
+                            className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                          >
+                            <Heart
+                              className={`h-5 w-5 ${
+                                favorites.has(listing.id)
+                                  ? "fill-red-500 text-red-500"
+                                  : "text-slate-600"
+                              }`}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            
-                            {/* Favorite Button */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                toggleFavorite(listing.id);
-                              }}
-                              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
-                            >
-                              <Heart 
-                                className={`h-5 w-5 ${favorites.has(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-600'}`} 
-                              />
-                            </button>
+                          </button>
 
-                            {/* Badge */}
-                            {listing.listing_themes?.length > 0 && (
-                              <div className="absolute top-3 left-3">
-                                <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-lg">
-                                  {listing.listing_themes[0].theme_categories.label_ko}
-                                </Badge>
-                              </div>
-                            )}
-
-                            {/* View Count */}
-                            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
-                              <Eye className="h-3 w-3" />
-                              {Math.floor(Math.random() * 200) + 50}
+                          {/* Badge */}
+                          {listing.listing_themes?.length > 0 && (
+                            <div className="absolute top-3 left-3">
+                              <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 shadow-lg">
+                                {
+                                  listing.listing_themes[0].theme_categories
+                                    .label_ko
+                                }
+                              </Badge>
                             </div>
-                          </div>
+                          )}
 
-                          {/* Content Section */}
-                          <CardContent className="p-5">
-                            <div className="space-y-3">
-                              <h3 className="font-bold text-lg text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                                {listing.title}
-                              </h3>
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-2xl font-bold text-slate-900">
-                                    {formatPrice(listing.price_deposit)}
-                                    <span className="text-sm font-normal text-slate-600 ml-1">만원</span>
-                                  </span>
-                                  {listing.price_monthly && (
-                                    <span className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
-                                      월 {formatPrice(listing.price_monthly)}만원
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <div className="flex items-center gap-4 text-sm text-slate-600">
-                                  <div className="flex items-center gap-1">
-                                    <Square className="h-4 w-4 text-blue-500" />
-                                    전용 {formatArea(listing.exclusive_m2)}
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Building2 className="h-4 w-4 text-green-500" />
-                                    {listing.floor}층
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-1 text-sm text-slate-500">
-                                  <MapPin className="h-4 w-4" />
-                                  <span className="line-clamp-1">{listing.address_road}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </>
-                      ) : (
-                        /* List View */
-                        <div className="flex p-4">
-                          <div className="w-48 h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl overflow-hidden relative flex-shrink-0">
-                            <img
-                              src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=130&fit=crop"
-                              alt={listing.title}
-                              className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
-                            />
+                          {/* View Count */}
+                          <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+                            <Eye className="h-3 w-3" />
+                            {Math.floor(Math.random() * 200) + 50}
                           </div>
-                          
-                          <div className="flex-1 ml-6 flex justify-between">
+                        </div>
+
+                        {/* Content Section */}
+                        <CardContent className="p-5">
+                          <div className="space-y-3">
+                            <h3 className="font-bold text-lg text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                              {listing.title}
+                            </h3>
+
                             <div className="space-y-2">
-                              <h3 className="font-bold text-xl text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                                {listing.title}
-                              </h3>
-                              
-                              <div className="flex items-center gap-4">
+                              <div className="flex items-center justify-between">
                                 <span className="text-2xl font-bold text-slate-900">
-                                  {formatPrice(listing.price_deposit)}만원
+                                  {formatPrice(listing.price_deposit)}
+                                  <span className="text-sm font-normal text-slate-600 ml-1">
+                                    만원
+                                  </span>
                                 </span>
                                 {listing.price_monthly && (
-                                  <span className="text-lg text-slate-600">
-                                    / 월 {formatPrice(listing.price_monthly)}만원
+                                  <span className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
+                                    월 {formatPrice(listing.price_monthly)}만원
                                   </span>
                                 )}
                               </div>
-                              
-                              <div className="flex items-center gap-6 text-sm text-slate-600">
+
+                              <div className="flex items-center gap-4 text-sm text-slate-600">
                                 <div className="flex items-center gap-1">
                                   <Square className="h-4 w-4 text-blue-500" />
                                   전용 {formatArea(listing.exclusive_m2)}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Square className="h-4 w-4 text-green-500" />
-                                  공급 {formatArea(listing.supply_m2)}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Building2 className="h-4 w-4 text-purple-500" />
+                                  <Building2 className="h-4 w-4 text-green-500" />
                                   {listing.floor}층
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center gap-1 text-sm text-slate-500">
                                 <MapPin className="h-4 w-4" />
-                                <span>{listing.address_road}</span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-col items-end justify-between">
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  toggleFavorite(listing.id);
-                                }}
-                                className="w-10 h-10 bg-slate-100 hover:bg-red-50 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110"
-                              >
-                                <Heart 
-                                  className={`h-5 w-5 ${favorites.has(listing.id) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} 
-                                />
-                              </button>
-                              
-                              <div className="flex items-center gap-1 text-xs text-slate-400">
-                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                <span>4.{Math.floor(Math.random() * 9) + 1}</span>
+                                <span className="line-clamp-1">
+                                  {listing.address_road}
+                                </span>
                               </div>
                             </div>
                           </div>
+                        </CardContent>
+                      </>
+                    ) : (
+                      /* List View */
+                      <div className="flex p-4">
+                        <div className="w-48 h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl overflow-hidden relative flex-shrink-0">
+                          <img
+                            src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=130&fit=crop"
+                            alt={listing.title}
+                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                          />
                         </div>
-                      )}
-                    </Card>
+
+                        <div className="flex-1 ml-6 flex justify-between">
+                          <div className="space-y-2">
+                            <h3 className="font-bold text-xl text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                              {listing.title}
+                            </h3>
+
+                            <div className="flex items-center gap-4">
+                              <span className="text-2xl font-bold text-slate-900">
+                                {formatPrice(listing.price_deposit)}만원
+                              </span>
+                              {listing.price_monthly && (
+                                <span className="text-lg text-slate-600">
+                                  / 월 {formatPrice(listing.price_monthly)}만원
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-6 text-sm text-slate-600">
+                              <div className="flex items-center gap-1">
+                                <Square className="h-4 w-4 text-blue-500" />
+                                전용 {formatArea(listing.exclusive_m2)}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Square className="h-4 w-4 text-green-500" />
+                                공급 {formatArea(listing.supply_m2)}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Building2 className="h-4 w-4 text-purple-500" />
+                                {listing.floor}층
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1 text-sm text-slate-500">
+                              <MapPin className="h-4 w-4" />
+                              <span>{listing.address_road}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end justify-between">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleFavorite(listing.id);
+                              }}
+                              className="w-10 h-10 bg-slate-100 hover:bg-red-50 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110"
+                            >
+                              <Heart
+                                className={`h-5 w-5 ${
+                                  favorites.has(listing.id)
+                                    ? "fill-red-500 text-red-500"
+                                    : "text-slate-400"
+                                }`}
+                              />
+                            </button>
+
+                            <div className="flex items-center gap-1 text-xs text-slate-400">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span>4.{Math.floor(Math.random() * 9) + 1}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
                 </div>
               ))}
             </div>
