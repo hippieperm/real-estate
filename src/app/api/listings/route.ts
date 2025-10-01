@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
       address_jibun: address_jibun || null,
       status,
       location: `POINT(${longitude} ${latitude})`, // PostGIS POINT 형식으로 설정
+      latitude: Number(latitude), // 위도 저장
+      longitude: Number(longitude), // 경도 저장
       created_by: created_by || null, // created_by 필드 추가
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
