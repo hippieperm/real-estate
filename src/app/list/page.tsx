@@ -129,11 +129,25 @@ export default function ListSearchPage() {
     setLoading(true);
 
     try {
+      // 필터 정리: 기본값/최대값은 undefined로 보내서 필터링 안함
+      const cleanedFilters: any = {
+        query: filters.query || undefined,
+        property_type: filters.property_type.length > 0 ? filters.property_type : undefined,
+        min_deposit: filters.min_deposit > 0 ? filters.min_deposit : undefined,
+        max_deposit: filters.max_deposit < 1000000 ? filters.max_deposit : undefined,
+        min_monthly: filters.min_monthly > 0 ? filters.min_monthly : undefined,
+        max_monthly: filters.max_monthly < 100000 ? filters.max_monthly : undefined,
+        min_pyeong: filters.min_pyeong > 0 ? filters.min_pyeong : undefined,
+        max_pyeong: filters.max_pyeong < 10000 ? filters.max_pyeong : undefined,
+        sort_by: filters.sort_by,
+        stations: filters.stations?.length > 0 ? filters.stations : undefined,
+      };
+
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...filters,
+          ...cleanedFilters,
           page,
           limit: 20,
         }),
