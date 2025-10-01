@@ -6,7 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Search, Filter, MapPin, X, DollarSign, Square, Plus, Minus, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import {
+  Search,
+  Filter,
+  MapPin,
+  X,
+  DollarSign,
+  Square,
+  Plus,
+  Minus,
+  Loader2,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
 import { formatPrice, formatArea } from "@/lib/utils";
 import { ListingDetailModal } from "@/components/listing/ListingDetailModal";
 
@@ -22,16 +34,16 @@ export default function MapSearchPage() {
   const [filters, setFilters] = useState({
     query: "",
     min_deposit: 0,
-    max_deposit: 100000,
+    max_deposit: 1000000,
     min_pyeong: 0,
-    max_pyeong: 500,
+    max_pyeong: 10000,
     property_type: [],
     themes: [],
   });
   const [depositMinValue, setDepositMinValue] = useState("0");
-  const [depositMaxValue, setDepositMaxValue] = useState("100,000");
+  const [depositMaxValue, setDepositMaxValue] = useState("1,000,000");
   const [pyeongMinValue, setPyeongMinValue] = useState("0");
-  const [pyeongMaxValue, setPyeongMaxValue] = useState("500");
+  const [pyeongMaxValue, setPyeongMaxValue] = useState("10,000");
   const [showFilters, setShowFilters] = useState(true);
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -42,18 +54,22 @@ export default function MapSearchPage() {
   const [mapZoomLevel, setMapZoomLevel] = useState(5);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   useEffect(() => {
     // 로딩 타임아웃 설정 (10초)
     const timeout = setTimeout(() => {
-      setMapError('지도 로딩이 너무 오래 걸립니다. 페이지를 새로고침 해주세요.');
+      setMapError(
+        "지도 로딩이 너무 오래 걸립니다. 페이지를 새로고침 해주세요."
+      );
     }, 10000);
     setLoadingTimeout(timeout);
 
     // 카카오 맵 API 키 확인
     if (!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY) {
-      setMapError('카카오 맵 API 키가 설정되지 않았습니다.');
+      setMapError("카카오 맵 API 키가 설정되지 않았습니다.");
       return;
     }
 
@@ -64,106 +80,138 @@ export default function MapSearchPage() {
 
     script.onerror = () => {
       clearTimeout(timeout);
-      setMapError('카카오 맵 SDK 로드에 실패했습니다. 인터넷 연결을 확인해주세요.');
+      setMapError(
+        "카카오 맵 SDK 로드에 실패했습니다. 인터넷 연결을 확인해주세요."
+      );
     };
 
     script.onload = () => {
       try {
         window.kakao.maps.load(() => {
-        if (mapRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(37.5065, 127.0543), // Gangnam
-            level: 5,
-            // 부드러운 확대/축소를 위한 설정
-            draggable: true,
-            scrollwheel: true,
-            disableDoubleClick: false,
-            disableDoubleClickZoom: false,
-          };
-          mapInstance.current = new window.kakao.maps.Map(
-            mapRef.current,
-            options
-          );
-          
-          // 확대/축소 애니메이션 설정
-          mapInstance.current.setZoomable(true);
-          
-          // 부드러운 지도 이동을 위한 커스텀 컨트롤 추가 (안전하게)
-          try {
-            if (window.kakao.maps.MapTypeControl) {
-              const mapTypeControl = new window.kakao.maps.MapTypeControl();
-              mapInstance.current.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
-            }
-            
-            if (window.kakao.maps.ZoomControl) {
-              const zoomControl = new window.kakao.maps.ZoomControl();
-              mapInstance.current.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
-            }
-          } catch (controlError) {
-            console.warn('Map controls could not be added:', controlError);
-          }
-          
-          // 부드러운 줌 변경 이벤트 (안전하게 등록)
-          try {
-            window.kakao.maps.event.addListener(mapInstance.current, 'zoom_start', function() {
-              if (mapRef.current) {
-                mapRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-              }
-            });
-            
-            window.kakao.maps.event.addListener(mapInstance.current, 'zoom_changed', function() {
-              const level = mapInstance.current.getLevel();
-              setMapZoomLevel(level);
-              
-              if (mapRef.current) {
-                mapRef.current.style.transform = `scale(${1 + (level - 5) * 0.01})`;
-                setTimeout(() => {
-                  if (mapRef.current) {
-                    mapRef.current.style.transform = 'scale(1)';
-                  }
-                }, 300);
-              }
-            });
-            
-            window.kakao.maps.event.addListener(mapInstance.current, 'dragstart', function() {
-              if (mapRef.current) {
-                mapRef.current.style.transition = 'transform 0.2s ease-out';
-              }
-            });
-            
-            window.kakao.maps.event.addListener(mapInstance.current, 'dragend', function() {
-              if (mapRef.current) {
-                mapRef.current.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
-                mapRef.current.style.transform = 'scale(0.999)';
-                setTimeout(() => {
-                  if (mapRef.current) {
-                    mapRef.current.style.transform = 'scale(1)';
-                  }
-                }, 100);
-              }
-            });
-          } catch (eventError) {
-            console.warn('Map event listeners could not be added:', eventError);
-          }
+          if (mapRef.current) {
+            const options = {
+              center: new window.kakao.maps.LatLng(37.5065, 127.0543), // Gangnam
+              level: 5,
+              // 부드러운 확대/축소를 위한 설정
+              draggable: true,
+              scrollwheel: true,
+              disableDoubleClick: false,
+              disableDoubleClickZoom: false,
+            };
+            mapInstance.current = new window.kakao.maps.Map(
+              mapRef.current,
+              options
+            );
 
-          // 지도 로드 완료 후 부드러운 페이드인 효과
-          clearTimeout(timeout);
-          setTimeout(() => {
-            if (mapRef.current) {
-              mapRef.current.style.opacity = '1';
-              mapRef.current.style.transition = 'opacity 0.5s ease-in-out, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-              setIsMapLoaded(true);
+            // 확대/축소 애니메이션 설정
+            mapInstance.current.setZoomable(true);
+
+            // 부드러운 지도 이동을 위한 커스텀 컨트롤 추가 (안전하게)
+            try {
+              if (window.kakao.maps.MapTypeControl) {
+                const mapTypeControl = new window.kakao.maps.MapTypeControl();
+                mapInstance.current.addControl(
+                  mapTypeControl,
+                  window.kakao.maps.ControlPosition.TOPRIGHT
+                );
+              }
+
+              if (window.kakao.maps.ZoomControl) {
+                const zoomControl = new window.kakao.maps.ZoomControl();
+                mapInstance.current.addControl(
+                  zoomControl,
+                  window.kakao.maps.ControlPosition.RIGHT
+                );
+              }
+            } catch (controlError) {
+              console.warn("Map controls could not be added:", controlError);
             }
-          }, 100);
-          
-          // Initial search
-          searchListings();
-        }
+
+            // 부드러운 줌 변경 이벤트 (안전하게 등록)
+            try {
+              window.kakao.maps.event.addListener(
+                mapInstance.current,
+                "zoom_start",
+                function () {
+                  if (mapRef.current) {
+                    mapRef.current.style.transition =
+                      "transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+                  }
+                }
+              );
+
+              window.kakao.maps.event.addListener(
+                mapInstance.current,
+                "zoom_changed",
+                function () {
+                  const level = mapInstance.current.getLevel();
+                  setMapZoomLevel(level);
+
+                  if (mapRef.current) {
+                    mapRef.current.style.transform = `scale(${
+                      1 + (level - 5) * 0.01
+                    })`;
+                    setTimeout(() => {
+                      if (mapRef.current) {
+                        mapRef.current.style.transform = "scale(1)";
+                      }
+                    }, 300);
+                  }
+                }
+              );
+
+              window.kakao.maps.event.addListener(
+                mapInstance.current,
+                "dragstart",
+                function () {
+                  if (mapRef.current) {
+                    mapRef.current.style.transition = "transform 0.2s ease-out";
+                  }
+                }
+              );
+
+              window.kakao.maps.event.addListener(
+                mapInstance.current,
+                "dragend",
+                function () {
+                  if (mapRef.current) {
+                    mapRef.current.style.transition =
+                      "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)";
+                    mapRef.current.style.transform = "scale(0.999)";
+                    setTimeout(() => {
+                      if (mapRef.current) {
+                        mapRef.current.style.transform = "scale(1)";
+                      }
+                    }, 100);
+                  }
+                }
+              );
+            } catch (eventError) {
+              console.warn(
+                "Map event listeners could not be added:",
+                eventError
+              );
+            }
+
+            // 지도 로드 완료 후 부드러운 페이드인 효과
+            clearTimeout(timeout);
+            setTimeout(() => {
+              if (mapRef.current) {
+                mapRef.current.style.opacity = "1";
+                mapRef.current.style.transition =
+                  "opacity 0.5s ease-in-out, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+                setIsMapLoaded(true);
+              }
+            }, 100);
+
+            // Initial search
+            searchListings();
+          }
         });
       } catch (error) {
         clearTimeout(timeout);
-        console.error('Kakao Maps initialization error:', error);
-        setMapError('지도 초기화 중 오류가 발생했습니다.');
+        console.error("Kakao Maps initialization error:", error);
+        setMapError("지도 초기화 중 오류가 발생했습니다.");
       }
     };
 
@@ -182,16 +230,26 @@ export default function MapSearchPage() {
     setLoading(true);
 
     try {
+      const requestBody = {
+        ...filters,
+        limit: 100,
+      };
+
+      console.log("Map page search request:", requestBody);
+
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...filters,
-          limit: 100,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+      console.log("Map page search results:", {
+        response: response.status,
+        data,
+        listingsCount: data.listings?.length,
+        total: data.total,
+      });
       setListings(data.listings || []);
 
       // Update markers on map
@@ -219,7 +277,7 @@ export default function MapSearchPage() {
       ? new Intl.NumberFormat("ko-KR").format(Number(value))
       : "";
     setDepositMaxValue(formatted);
-    setFilters({ ...filters, max_deposit: Number(value) || 100000 });
+    setFilters({ ...filters, max_deposit: Number(value) || 1000000 });
   };
 
   const handlePyeongMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +295,7 @@ export default function MapSearchPage() {
       ? new Intl.NumberFormat("ko-KR").format(Number(value))
       : "";
     setPyeongMaxValue(formatted);
-    setFilters({ ...filters, max_pyeong: Number(value) || 500 });
+    setFilters({ ...filters, max_pyeong: Number(value) || 10000 });
   };
 
   // 부드러운 줌 인/아웃 함수
@@ -246,12 +304,12 @@ export default function MapSearchPage() {
       const newLevel = mapZoomLevel - 1;
       try {
         // 애니메이션 옵션이 지원되는지 확인하고 사용
-        if (typeof mapInstance.current.setLevel === 'function') {
+        if (typeof mapInstance.current.setLevel === "function") {
           mapInstance.current.setLevel(newLevel);
           setMapZoomLevel(newLevel);
         }
       } catch (error) {
-        console.warn('Zoom in failed:', error);
+        console.warn("Zoom in failed:", error);
       }
     }
   };
@@ -260,12 +318,12 @@ export default function MapSearchPage() {
     if (mapInstance.current && mapZoomLevel < 14) {
       const newLevel = mapZoomLevel + 1;
       try {
-        if (typeof mapInstance.current.setLevel === 'function') {
+        if (typeof mapInstance.current.setLevel === "function") {
           mapInstance.current.setLevel(newLevel);
           setMapZoomLevel(newLevel);
         }
       } catch (error) {
-        console.warn('Zoom out failed:', error);
+        console.warn("Zoom out failed:", error);
       }
     }
   };
@@ -279,15 +337,15 @@ export default function MapSearchPage() {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const moveLatLng = new window.kakao.maps.LatLng(lat, lng);
-            
+
             // 부드러운 이동 애니메이션
-            if (typeof mapInstance.current.panTo === 'function') {
+            if (typeof mapInstance.current.panTo === "function") {
               mapInstance.current.panTo(moveLatLng);
-            } else if (typeof mapInstance.current.setCenter === 'function') {
+            } else if (typeof mapInstance.current.setCenter === "function") {
               mapInstance.current.setCenter(moveLatLng);
             }
           } catch (error) {
-            console.warn('Move to location failed:', error);
+            console.warn("Move to location failed:", error);
           }
         },
         (error) => {
@@ -315,7 +373,7 @@ export default function MapSearchPage() {
         });
       }
     } catch (clustererError) {
-      console.warn('MarkerClusterer could not be created:', clustererError);
+      console.warn("MarkerClusterer could not be created:", clustererError);
     }
 
     const newMarkers = listings.map((listing) => {
@@ -434,13 +492,83 @@ export default function MapSearchPage() {
               </div>
             </div>
 
-            <Button
-              onClick={searchListings}
-              className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 font-semibold"
-            >
-              <Search className="mr-2 h-4 w-4" />
-              매물 검색
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={searchListings}
+                className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 font-semibold"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                매물 검색
+              </Button>
+
+              {/* Debug Button */}
+              <Button
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/debug/listings");
+                    const data = await response.json();
+                    console.log("Debug data from map page:", data);
+                    alert(
+                      `디버그 정보:\n전체: ${data.totalCount}\n활성: ${data.activeCount}\n생성자 있음: ${data.summary.withCreatedBy}\n생성자 없음: ${data.summary.withoutCreatedBy}`
+                    );
+                  } catch (error) {
+                    console.error("Debug fetch error:", error);
+                    alert("디버그 데이터를 가져올 수 없습니다.");
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+              >
+                🔍 디버그 정보
+              </Button>
+
+              {/* Create Test Listing Button */}
+              <Button
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/test/create-dummy", {
+                      method: "POST",
+                    });
+                    const data = await response.json();
+                    console.log("Test listing created:", data);
+                    alert("테스트 매물이 생성되었습니다!");
+                    // 자동으로 검색 실행
+                    setTimeout(() => searchListings(), 1000);
+                  } catch (error) {
+                    console.error("Create test listing error:", error);
+                    alert("테스트 매물 생성에 실패했습니다.");
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+              >
+                ➕ 테스트 매물 생성
+              </Button>
+
+              {/* Get All Listings Button */}
+              <Button
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/test/all-listings");
+                    const data = await response.json();
+                    console.log("All listings result:", data);
+                    alert(
+                      `전체 매물 조회 결과:\n총 개수: ${data.total}\n실제 조회: ${data.summary.total}\n생성자 있음: ${data.summary.withCreatedBy}\n생성자 없음: ${data.summary.withoutCreatedBy}`
+                    );
+                  } catch (error) {
+                    console.error("Get all listings error:", error);
+                    alert("전체 매물 조회에 실패했습니다.");
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                📊 전체 매물 조회
+              </Button>
+            </div>
           </div>
 
           {/* Results List */}
@@ -496,12 +624,12 @@ export default function MapSearchPage() {
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-lg text-slate-800">
                         보증금 {formatPrice(listing.price_deposit)}
-                        {listing.price_deposit < 10000 ? '만원' : ''}
+                        {listing.price_deposit < 10000 ? "만원" : ""}
                       </div>
                       {listing.price_monthly && (
                         <div className="text-sm text-slate-600">
                           월 {formatPrice(listing.price_monthly)}
-                          {listing.price_monthly < 10000 ? '만원' : ''}
+                          {listing.price_monthly < 10000 ? "만원" : ""}
                         </div>
                       )}
                     </div>
@@ -559,13 +687,17 @@ export default function MapSearchPage() {
                 <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">지도 로딩 중...</h3>
-                <p className="text-slate-600 text-sm">카카오 지도를 불러오고 있습니다</p>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  지도 로딩 중...
+                </h3>
+                <p className="text-slate-600 text-sm">
+                  카카오 지도를 불러오고 있습니다
+                </p>
               </div>
             </div>
           </div>
         )}
-        
+
         {/* 지도 로딩 에러 상태 */}
         {mapError && (
           <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center z-20 rounded-r-lg">
@@ -574,8 +706,12 @@ export default function MapSearchPage() {
                 <AlertTriangle className="h-8 w-8 text-red-500" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">지도 로딩 실패</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{mapError}</p>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                  지도 로딩 실패
+                </h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  {mapError}
+                </p>
               </div>
               <div className="space-y-3">
                 <div className="flex gap-3">
@@ -608,16 +744,20 @@ export default function MapSearchPage() {
             </div>
           </div>
         )}
-        
+
         {/* 실제 지도 또는 대체 컨텐츠 */}
         {mapError && isMapLoaded ? (
           // 지도 로딩 실패 시 매물 그리드 표시
           <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-r-lg p-6 overflow-auto">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-slate-800 mb-2">매물 목록</h3>
-              <p className="text-slate-600">지도 대신 매물을 목록 형태로 확인하세요</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                매물 목록
+              </h3>
+              <p className="text-slate-600">
+                지도 대신 매물을 목록 형태로 확인하세요
+              </p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
               {listings.map((listing, index) => (
                 <Card
@@ -633,7 +773,11 @@ export default function MapSearchPage() {
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-lg text-slate-800">
-                        보증금 {new Intl.NumberFormat("ko-KR").format(listing.price_deposit)}만원
+                        보증금{" "}
+                        {new Intl.NumberFormat("ko-KR").format(
+                          listing.price_deposit
+                        )}
+                        만원
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
@@ -660,14 +804,14 @@ export default function MapSearchPage() {
           <div
             ref={mapRef}
             className="w-full h-full rounded-r-lg overflow-hidden transition-all duration-300"
-            style={{ 
+            style={{
               opacity: 0,
-              filter: 'blur(0px)',
-              transform: 'scale(1)'
+              filter: "blur(0px)",
+              transform: "scale(1)",
             }}
           />
         )}
-        
+
         {/* 커스텀 줌 컨트롤 */}
         {isMapLoaded && (
           <div className="absolute right-6 top-1/2 transform -translate-y-1/2 z-10 space-y-2">
@@ -694,7 +838,7 @@ export default function MapSearchPage() {
                 <Minus className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {/* 현재 위치 버튼 */}
             <Button
               size="icon"
@@ -751,12 +895,12 @@ export default function MapSearchPage() {
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-xl text-slate-800">
                     보증금 {formatPrice(selectedListing.price_deposit)}
-                    {selectedListing.price_deposit < 10000 ? '만원' : ''}
+                    {selectedListing.price_deposit < 10000 ? "만원" : ""}
                   </div>
                   {selectedListing.price_monthly && (
                     <div className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
                       월 {formatPrice(selectedListing.price_monthly)}
-                      {selectedListing.price_monthly < 10000 ? '만원' : ''}
+                      {selectedListing.price_monthly < 10000 ? "만원" : ""}
                     </div>
                   )}
                 </div>
@@ -790,17 +934,29 @@ export default function MapSearchPage() {
                   >
                     상세보기
                   </Button>
-                  
+
                   {/* Quick Actions */}
                   <div className="flex gap-2 text-sm">
-                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="flex-1 gap-1 text-slate-600"
+                    >
                       <MapPin className="h-3 w-3" />
                       길찾기
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="flex-1 gap-1 text-slate-600"
+                    >
                       📞 문의
                     </Button>
-                    <Button size="sm" variant="ghost" className="flex-1 gap-1 text-slate-600">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="flex-1 gap-1 text-slate-600"
+                    >
                       ❤️ 찜하기
                     </Button>
                   </div>
