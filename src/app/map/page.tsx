@@ -387,23 +387,24 @@ export default function MapSearchPage() {
       console.warn("MarkerClusterer could not be created:", clustererError);
     }
 
-    const newMarkers = listings.map((listing) => {
-      // Parse location (would need actual coordinates from PostGIS)
-      const lat = 37.5065 + (Math.random() - 0.5) * 0.05;
-      const lng = 127.0543 + (Math.random() - 0.5) * 0.1;
+    const newMarkers = listings
+      .filter((listing) => listing.latitude && listing.longitude) // 위도/경도가 있는 매물만
+      .map((listing) => {
+        const lat = listing.latitude;
+        const lng = listing.longitude;
 
-      const markerPosition = new window.kakao.maps.LatLng(lat, lng);
+        const markerPosition = new window.kakao.maps.LatLng(lat, lng);
 
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition,
+        const marker = new window.kakao.maps.Marker({
+          position: markerPosition,
+        });
+
+        window.kakao.maps.event.addListener(marker, "click", () => {
+          setSelectedListing(listing);
+        });
+
+        return marker;
       });
-
-      window.kakao.maps.event.addListener(marker, "click", () => {
-        setSelectedListing(listing);
-      });
-
-      return marker;
-    });
 
     if (clusterer) {
       clusterer.addMarkers(newMarkers);
