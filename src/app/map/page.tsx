@@ -230,8 +230,19 @@ export default function MapSearchPage() {
     setLoading(true);
 
     try {
+      // 필터 정리: 기본값/최대값은 undefined로 보내서 필터링 안함
+      const cleanedFilters: any = {
+        query: filters.query || undefined,
+        property_type: filters.property_type.length > 0 ? filters.property_type : undefined,
+        min_deposit: filters.min_deposit > 0 ? filters.min_deposit : undefined,
+        max_deposit: filters.max_deposit < 1000000 ? filters.max_deposit : undefined,
+        min_pyeong: filters.min_pyeong > 0 ? filters.min_pyeong : undefined,
+        max_pyeong: filters.max_pyeong < 10000 ? filters.max_pyeong : undefined,
+        themes: filters.themes?.length > 0 ? filters.themes : undefined,
+      };
+
       const requestBody = {
-        ...filters,
+        ...cleanedFilters,
         limit: 100,
       };
 
