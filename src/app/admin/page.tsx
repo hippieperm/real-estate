@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Plus,
   Edit,
@@ -13,113 +13,123 @@ import {
   Building2,
   MapPin,
   Eye,
-  Filter
-} from "lucide-react"
-import { formatPrice, formatArea } from "@/lib/utils"
-import Link from "next/link"
-import { NotificationModal, useNotificationModal } from "@/components/ui/notification-modal"
+  Filter,
+} from "lucide-react";
+import { formatPrice, formatArea } from "@/lib/utils";
+import Link from "next/link";
+import {
+  NotificationModal,
+  useNotificationModal,
+} from "@/components/ui/notification-modal";
 
 export default function AdminPage() {
-  const { modal, closeModal, showSuccess, showError, showWarning } = useNotificationModal()
-  const [listings, setListings] = useState<any[]>([])
-  const [filteredListings, setFilteredListings] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const { modal, closeModal, showSuccess, showError, showWarning } =
+    useNotificationModal();
+  const [listings, setListings] = useState<any[]>([]);
+  const [filteredListings, setFilteredListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
-    fetchListings()
-  }, [])
+    fetchListings();
+  }, []);
 
   useEffect(() => {
-    filterListings()
-  }, [searchTerm, statusFilter, listings])
+    filterListings();
+  }, [searchTerm, statusFilter, listings]);
 
   const fetchListings = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      setLoading(true);
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           limit: 100,
-          sort_by: 'created_at'
-        })
-      })
-      const data = await response.json()
-      setListings(data.listings || [])
+          sort_by: "created_at",
+        }),
+      });
+      const data = await response.json();
+      console.log("Admin fetch listings:", {
+        response: response.status,
+        data,
+        listingsCount: data.listings?.length,
+      });
+      setListings(data.listings || []);
     } catch (error) {
-      console.error('Failed to fetch listings:', error)
+      console.error("Failed to fetch listings:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const filterListings = () => {
-    let filtered = listings
+    let filtered = listings;
 
     // 검색어 필터링
     if (searchTerm) {
-      filtered = filtered.filter(listing =>
-        listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        listing.address_road.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(
+        (listing) =>
+          listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          listing.address_road.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     // 상태 필터링
     if (statusFilter !== "all") {
-      filtered = filtered.filter(listing => listing.status === statusFilter)
+      filtered = filtered.filter((listing) => listing.status === statusFilter);
     }
 
-    setFilteredListings(filtered)
-  }
+    setFilteredListings(filtered);
+  };
 
   const handleCreateListing = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    console.log('Create listing button clicked!', e)
-    window.location.href = '/admin/create'
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Create listing button clicked!", e);
+    window.location.href = "/admin/create";
+  };
 
   const handleFilterClick = (status: string) => (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    console.log('Filter button clicked:', status, e)
-    setStatusFilter(status)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Filter button clicked:", status, e);
+    setStatusFilter(status);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Search input changed:', e.target.value)
-    setSearchTerm(e.target.value)
-  }
+    console.log("Search input changed:", e.target.value);
+    setSearchTerm(e.target.value);
+  };
 
   const handleDeleteClick = (id: string) => {
     showWarning(
-      '매물 삭제',
-      '정말로 이 매물을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
+      "매물 삭제",
+      "정말로 이 매물을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
       () => deleteListing(id)
-    )
-  }
+    );
+  };
 
   const deleteListing = async (id: string) => {
-    closeModal()
+    closeModal();
 
     try {
       const response = await fetch(`/api/listings/${id}`, {
-        method: 'DELETE'
-      })
+        method: "DELETE",
+      });
 
       if (response.ok) {
-        showSuccess('성공', '매물이 삭제되었습니다.')
-        fetchListings()
+        showSuccess("성공", "매물이 삭제되었습니다.");
+        fetchListings();
       } else {
-        showError('오류', '삭제에 실패했습니다.')
+        showError("오류", "삭제에 실패했습니다.");
       }
     } catch (error) {
-      console.error('Delete error:', error)
-      showError('오류', '삭제 중 오류가 발생했습니다.')
+      console.error("Delete error:", error);
+      showError("오류", "삭제 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -128,16 +138,24 @@ export default function AdminPage() {
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <Building2 className="h-8 w-8 text-blue-600" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-800 mb-2">매물을 불러오는 중...</h3>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">
+            매물을 불러오는 중...
+          </h3>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50" style={{ position: 'relative', zIndex: 1 }}>
+    <div
+      className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50"
+      style={{ position: "relative", zIndex: 1 }}
+    >
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-2xl" style={{ position: 'relative', zIndex: 10 }}>
+      <div
+        className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-2xl"
+        style={{ position: "relative", zIndex: 10 }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -147,16 +165,21 @@ export default function AdminPage() {
                 </div>
                 매물 관리
               </h1>
-              <p className="text-slate-300 text-lg font-medium">등록된 매물을 관리하고 새로운 매물을 추가하세요</p>
+              <p className="text-slate-300 text-lg font-medium">
+                등록된 매물을 관리하고 새로운 매물을 추가하세요
+              </p>
             </div>
             <Button
               onClick={handleCreateListing}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 h-14 px-8 text-lg font-bold rounded-2xl cursor-pointer"
               type="button"
-              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 20 }}
+              style={{
+                pointerEvents: "auto",
+                position: "relative",
+                zIndex: 20,
+              }}
             >
-              <Plus className="h-5 w-5 mr-2" />
-              새 매물 등록
+              <Plus className="h-5 w-5 mr-2" />새 매물 등록
             </Button>
           </div>
         </div>
@@ -164,7 +187,10 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Filters */}
-        <Card className="mb-8 border-0 shadow-2xl bg-white rounded-3xl overflow-hidden" style={{ position: 'relative', zIndex: 5 }}>
+        <Card
+          className="mb-8 border-0 shadow-2xl bg-white rounded-3xl overflow-hidden"
+          style={{ position: "relative", zIndex: 5 }}
+        >
           <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-1">
             <CardContent className="p-8 bg-white rounded-3xl">
               <div className="flex flex-col md:flex-row gap-6">
@@ -180,7 +206,7 @@ export default function AdminPage() {
                       value={searchTerm}
                       onChange={handleSearchChange}
                       className="pl-20 h-16 border-2 border-slate-200 focus:border-blue-500 rounded-2xl text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-                      style={{ position: 'relative', zIndex: 10 }}
+                      style={{ position: "relative", zIndex: 10 }}
                     />
                   </div>
                 </div>
@@ -190,15 +216,24 @@ export default function AdminPage() {
                       key={status}
                       variant={statusFilter === status ? "default" : "outline"}
                       onClick={handleFilterClick(status)}
-                      className={`h-16 px-6 rounded-2xl font-bold transition-all duration-300 cursor-pointer ${statusFilter === status
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-2xl scale-105"
-                        : "bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 shadow-lg hover:shadow-xl"
-                        }`}
+                      className={`h-16 px-6 rounded-2xl font-bold transition-all duration-300 cursor-pointer ${
+                        statusFilter === status
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-2xl scale-105"
+                          : "bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 shadow-lg hover:shadow-xl"
+                      }`}
                       type="button"
-                      style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
+                      style={{
+                        pointerEvents: "auto",
+                        position: "relative",
+                        zIndex: 10,
+                      }}
                     >
                       <Filter className="h-5 w-5 mr-2" />
-                      {status === "all" ? "전체" : status === "active" ? "활성" : "비활성"}
+                      {status === "all"
+                        ? "전체"
+                        : status === "active"
+                        ? "활성"
+                        : "비활성"}
                     </Button>
                   ))}
                 </div>
@@ -219,7 +254,9 @@ export default function AdminPage() {
                     전체 매물
                   </p>
                   <p className="text-5xl font-black mb-1">{listings.length}</p>
-                  <p className="text-blue-200 text-xs font-medium">Total Listings</p>
+                  <p className="text-blue-200 text-xs font-medium">
+                    Total Listings
+                  </p>
                 </div>
                 <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <Building2 className="h-12 w-12 text-white" />
@@ -238,9 +275,11 @@ export default function AdminPage() {
                     활성 매물
                   </p>
                   <p className="text-5xl font-black mb-1">
-                    {listings.filter(l => l.status === 'active').length}
+                    {listings.filter((l) => l.status === "active").length}
                   </p>
-                  <p className="text-emerald-200 text-xs font-medium">Active Listings</p>
+                  <p className="text-emerald-200 text-xs font-medium">
+                    Active Listings
+                  </p>
                 </div>
                 <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <Eye className="h-12 w-12 text-white" />
@@ -259,9 +298,11 @@ export default function AdminPage() {
                     비활성 매물
                   </p>
                   <p className="text-5xl font-black mb-1">
-                    {listings.filter(l => l.status === 'inactive').length}
+                    {listings.filter((l) => l.status === "inactive").length}
                   </p>
-                  <p className="text-purple-200 text-xs font-medium">Inactive Listings</p>
+                  <p className="text-purple-200 text-xs font-medium">
+                    Inactive Listings
+                  </p>
                 </div>
                 <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <Building2 className="h-12 w-12 text-white" />
@@ -274,13 +315,18 @@ export default function AdminPage() {
         {/* Listings Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredListings.map((listing) => (
-            <Card key={listing.id} className="group overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-3xl relative">
+            <Card
+              key={listing.id}
+              className="group overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white rounded-3xl relative"
+            >
               {/* 카드 상단 그라디언트 */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
 
               <div className="aspect-video bg-gradient-to-br from-slate-300 via-blue-200 to-purple-300 relative overflow-hidden">
                 <img
-                  src={`https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(listing.title.slice(0, 10))}`}
+                  src={`https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(
+                    listing.title.slice(0, 10)
+                  )}`}
                   alt={listing.title}
                   className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
                 />
@@ -288,26 +334,35 @@ export default function AdminPage() {
 
                 <div className="absolute top-4 left-4 flex gap-2">
                   <Badge
-                    className={listing.status === 'active'
-                      ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
-                      : "bg-gradient-to-r from-red-500 to-rose-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
+                    className={
+                      listing.status === "active"
+                        ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
+                        : "bg-gradient-to-r from-red-500 to-rose-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
                     }
                   >
-                    {listing.status === 'active' ? '✓ 활성' : '✕ 비활성'}
+                    {listing.status === "active" ? "✓ 활성" : "✕ 비활성"}
                   </Badge>
                 </div>
 
                 <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-xl">
-                  <div className="text-xs text-slate-500 font-medium">매물코드</div>
-                  <div className="text-sm font-bold text-slate-900">{listing.code}</div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    매물코드
+                  </div>
+                  <div className="text-sm font-bold text-slate-900">
+                    {listing.code}
+                  </div>
                 </div>
               </div>
 
               <CardHeader className="relative pb-4">
-                <CardTitle className="text-2xl font-bold text-slate-900 line-clamp-2 mb-3 group-hover:text-blue-600 transition-colors">{listing.title}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-slate-900 line-clamp-2 mb-3 group-hover:text-blue-600 transition-colors">
+                  {listing.title}
+                </CardTitle>
                 <div className="flex items-center gap-2 text-slate-600 bg-slate-50 rounded-xl px-3 py-2">
                   <MapPin className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-sm font-medium line-clamp-1">{listing.address_road}</span>
+                  <span className="text-sm font-medium line-clamp-1">
+                    {listing.address_road}
+                  </span>
                 </div>
               </CardHeader>
 
@@ -315,22 +370,26 @@ export default function AdminPage() {
                 {/* 가격 정보 */}
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border-2 border-blue-100">
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-xs text-blue-600 font-bold">보증금</span>
+                    <span className="text-xs text-blue-600 font-bold">
+                      보증금
+                    </span>
                     <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                       {formatPrice(listing.price_deposit)}
                     </span>
                     <span className="text-sm text-slate-500 font-medium">
-                      {listing.price_deposit < 10000 ? '만원' : ''}
+                      {listing.price_deposit < 10000 ? "만원" : ""}
                     </span>
                   </div>
                   {listing.price_monthly && (
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xs text-purple-600 font-bold">월세</span>
+                      <span className="text-xs text-purple-600 font-bold">
+                        월세
+                      </span>
                       <span className="text-lg font-bold text-purple-600">
                         {formatPrice(listing.price_monthly)}
                       </span>
                       <span className="text-xs text-slate-500 font-medium">
-                        {listing.price_monthly < 10000 ? '만원' : ''}
+                        {listing.price_monthly < 10000 ? "만원" : ""}
                       </span>
                     </div>
                   )}
@@ -339,12 +398,20 @@ export default function AdminPage() {
                 {/* 매물 정보 */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 font-medium mb-1">전용면적</div>
-                    <div className="text-lg font-bold text-slate-900">{formatArea(listing.exclusive_m2)}</div>
+                    <div className="text-xs text-slate-500 font-medium mb-1">
+                      전용면적
+                    </div>
+                    <div className="text-lg font-bold text-slate-900">
+                      {formatArea(listing.exclusive_m2)}
+                    </div>
                   </div>
                   <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                    <div className="text-xs text-slate-500 font-medium mb-1">층수</div>
-                    <div className="text-lg font-bold text-slate-900">{listing.floor}층</div>
+                    <div className="text-xs text-slate-500 font-medium mb-1">
+                      층수
+                    </div>
+                    <div className="text-lg font-bold text-slate-900">
+                      {listing.floor}층
+                    </div>
                   </div>
                 </div>
 
@@ -372,13 +439,19 @@ export default function AdminPage() {
         {filteredListings.length === 0 && !loading && (
           <div className="text-center py-12">
             <Building2 className="h-24 w-24 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">매물이 없습니다</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">
+              매물이 없습니다
+            </h3>
             <p className="text-slate-600 mb-6">새로운 매물을 등록해보세요</p>
             <Button
               onClick={handleCreateListing}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 cursor-pointer"
               type="button"
-              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 20 }}
+              style={{
+                pointerEvents: "auto",
+                position: "relative",
+                zIndex: 20,
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               매물 등록하기
@@ -396,5 +469,5 @@ export default function AdminPage() {
         onConfirm={modal.onConfirm}
       />
     </div>
-  )
+  );
 }
