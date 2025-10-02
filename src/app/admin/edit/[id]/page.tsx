@@ -31,6 +31,7 @@ import {
   Loader,
 } from "lucide-react";
 import Link from "next/link";
+import { getStatusLabel, getStatusIcon, ListingStatus } from "@/lib/utils";
 
 export default function EditListingPage() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function EditListingPage() {
     address_detail: "",
     latitude: "",
     longitude: "",
-    status: "active",
+    status: "available",
   });
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function EditListingPage() {
           address_detail: listing.address_detail || "",
           latitude: listing.latitude?.toString() || "",
           longitude: listing.longitude?.toString() || "",
-          status: listing.status || "active",
+          status: listing.status || "available",
         };
 
         console.log("Setting form data:", formDataToSet);
@@ -476,8 +477,13 @@ export default function EditListingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      <SelectItem value="active">✅ 활성</SelectItem>
-                      <SelectItem value="inactive">⭕ 비활성</SelectItem>
+                      <SelectItem value="available">{getStatusIcon("available")} {getStatusLabel("available")}</SelectItem>
+                      <SelectItem value="reserved">{getStatusIcon("reserved")} {getStatusLabel("reserved")}</SelectItem>
+                      <SelectItem value="in_progress">{getStatusIcon("in_progress")} {getStatusLabel("in_progress")}</SelectItem>
+                      <SelectItem value="completed">{getStatusIcon("completed")} {getStatusLabel("completed")}</SelectItem>
+                      <SelectItem value="withdrawn">{getStatusIcon("withdrawn")} {getStatusLabel("withdrawn")}</SelectItem>
+                      <SelectItem value="hidden">{getStatusIcon("hidden")} {getStatusLabel("hidden")}</SelectItem>
+                      <SelectItem value="archived">{getStatusIcon("archived")} {getStatusLabel("archived")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -126,7 +126,7 @@ export type Database = {
           floor: number | null
           floors_total: number | null
           property_type: 'office' | 'retail' | 'whole_building' | 'residential' | 'etc'
-          status: 'active' | 'hidden' | 'archived'
+          status: 'active' | 'hidden' | 'archived' | 'available' | 'reserved' | 'in_progress' | 'completed' | 'withdrawn'
           location: unknown
           address_road: string | null
           address_jibun: string | null
@@ -150,7 +150,7 @@ export type Database = {
           floor?: number | null
           floors_total?: number | null
           property_type?: 'office' | 'retail' | 'whole_building' | 'residential' | 'etc'
-          status?: 'active' | 'hidden' | 'archived'
+          status?: 'active' | 'hidden' | 'archived' | 'available' | 'reserved' | 'in_progress' | 'completed' | 'withdrawn'
           location: unknown
           address_road?: string | null
           address_jibun?: string | null
@@ -174,7 +174,7 @@ export type Database = {
           floor?: number | null
           floors_total?: number | null
           property_type?: 'office' | 'retail' | 'whole_building' | 'residential' | 'etc'
-          status?: 'active' | 'hidden' | 'archived'
+          status?: 'active' | 'hidden' | 'archived' | 'available' | 'reserved' | 'in_progress' | 'completed' | 'withdrawn'
           location?: unknown
           address_road?: string | null
           address_jibun?: string | null
@@ -392,7 +392,7 @@ export type Database = {
     Enums: {
       user_role: 'admin' | 'agent' | 'user'
       property_type: 'office' | 'retail' | 'whole_building' | 'residential' | 'etc'
-      listing_status: 'active' | 'hidden' | 'archived'
+      listing_status: 'active' | 'hidden' | 'archived' | 'available' | 'reserved' | 'in_progress' | 'completed' | 'withdrawn'
       inquiry_status: 'new' | 'in_progress' | 'done'
       inquiry_source: 'web' | 'map' | 'list'
     }

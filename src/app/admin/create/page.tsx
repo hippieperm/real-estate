@@ -38,6 +38,7 @@ import {
   MapIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { getStatusLabel, getStatusIcon, ListingStatus } from "@/lib/utils";
 
 export default function CreateListingPage() {
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function CreateListingPage() {
     address_detail: "",
     latitude: "",
     longitude: "",
-    status: "active",
+    status: "available",
   });
 
   const formatNumber = (value: string) => {
@@ -520,7 +521,7 @@ export default function CreateListingPage() {
                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                     상태
                     <span className="text-xs text-slate-500 font-normal">
-                      (기본값: 활성)
+                      (기본값: 매물가능)
                     </span>
                   </Label>
                   <Select
@@ -533,17 +534,26 @@ export default function CreateListingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl shadow-2xl border-2 border-slate-200">
-                      <SelectItem
-                        value="active"
-                        className="text-lg font-medium py-4"
-                      >
-                        ✅ 활성
+                      <SelectItem value="available" className="text-lg font-medium py-4">
+                        {getStatusIcon("available")} {getStatusLabel("available")}
                       </SelectItem>
-                      <SelectItem
-                        value="inactive"
-                        className="text-lg font-medium py-4"
-                      >
-                        ⭕ 비활성
+                      <SelectItem value="reserved" className="text-lg font-medium py-4">
+                        {getStatusIcon("reserved")} {getStatusLabel("reserved")}
+                      </SelectItem>
+                      <SelectItem value="in_progress" className="text-lg font-medium py-4">
+                        {getStatusIcon("in_progress")} {getStatusLabel("in_progress")}
+                      </SelectItem>
+                      <SelectItem value="completed" className="text-lg font-medium py-4">
+                        {getStatusIcon("completed")} {getStatusLabel("completed")}
+                      </SelectItem>
+                      <SelectItem value="withdrawn" className="text-lg font-medium py-4">
+                        {getStatusIcon("withdrawn")} {getStatusLabel("withdrawn")}
+                      </SelectItem>
+                      <SelectItem value="hidden" className="text-lg font-medium py-4">
+                        {getStatusIcon("hidden")} {getStatusLabel("hidden")}
+                      </SelectItem>
+                      <SelectItem value="archived" className="text-lg font-medium py-4">
+                        {getStatusIcon("archived")} {getStatusLabel("archived")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
