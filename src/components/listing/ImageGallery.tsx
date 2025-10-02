@@ -41,7 +41,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
           onClick={() => setShowModal(true)}
         >
           <img
-            src={`https://via.placeholder.com/800x600?text=${encodeURIComponent(title)}`}
+            src={images[0]}
             alt={title}
             className="object-cover w-full h-full rounded-l-lg"
           />
@@ -64,7 +64,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
               }}
             >
               <img
-                src={`https://via.placeholder.com/200x200?text=Image${index + 2}`}
+                src={image}
                 alt={`${title} ${index + 2}`}
                 className="object-cover w-full h-full rounded"
               />
@@ -108,7 +108,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
 
             {/* Main Image */}
             <img
-              src={`https://via.placeholder.com/1200x800?text=${encodeURIComponent(title)}+${currentIndex + 1}`}
+              src={images[currentIndex]}
               alt={`${title} ${currentIndex + 1}`}
               className="max-w-full max-h-full object-contain"
             />
@@ -141,7 +141,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
                   }`}
                 >
                   <img
-                    src={`https://via.placeholder.com/64x64?text=${index + 1}`}
+                    src={image}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
