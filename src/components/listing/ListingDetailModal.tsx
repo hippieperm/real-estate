@@ -61,12 +61,17 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
 
   if (!isOpen || !listing) return null
 
+  // 실제 이미지가 있으면 사용하고, 없으면 더미 이미지 사용
+  const images = listing.listing_images && listing.listing_images.length > 0 
+    ? listing.listing_images.map((img: any) => img.path)
+    : sampleImages
+
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % sampleImages.length)
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
   }
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + sampleImages.length) % sampleImages.length)
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
   return (
@@ -110,13 +115,17 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
           {/* Image Gallery */}
           <div className="relative bg-slate-100">
             <img
-              src={sampleImages[currentImageIndex]}
+              src={images[currentImageIndex]}
               alt={listing.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = sampleImages[0]; // 에러 시 첫 번째 더미 이미지로 대체
+              }}
             />
             
             {/* Image Navigation */}
-            {sampleImages.length > 1 && (
+            {images.length > 1 && (
               <>
                 <Button
                   size="icon"
@@ -140,7 +149,7 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
             {/* Image Counter */}
             <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
               <Camera className="h-4 w-4" />
-              {currentImageIndex + 1} / {sampleImages.length}
+              {currentImageIndex + 1} / {images.length}
             </div>
 
             {/* Property Status Badge */}
