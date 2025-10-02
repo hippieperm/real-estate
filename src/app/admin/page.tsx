@@ -323,13 +323,17 @@ export default function AdminPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
 
               <div className="aspect-video bg-gradient-to-br from-slate-300 via-blue-200 to-purple-300 relative overflow-hidden">
-                <img
-                  src={`https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(
-                    listing.title.slice(0, 10)
-                  )}`}
-                  alt={listing.title}
-                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
-                />
+                {listing.images && listing.images.length > 0 ? (
+                  <img
+                    src={listing.images[0].path}
+                    alt={listing.title}
+                    className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                    <Building2 className="h-16 w-16 text-slate-400" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <div className="absolute top-4 left-4 flex gap-2">
