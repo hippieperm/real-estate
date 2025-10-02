@@ -54,6 +54,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 숫자 필드 범위 검증 (NUMERIC(10,2) 제한: 최대 99,999,999.99)
+    const MAX_NUMERIC_VALUE = 99999999.99;
+    
+    if (price_deposit > MAX_NUMERIC_VALUE) {
+      return NextResponse.json(
+        { error: `보증금은 최대 ${MAX_NUMERIC_VALUE.toLocaleString()}까지 입력 가능합니다` },
+        { status: 400 }
+      );
+    }
+    
+    if (price_monthly && price_monthly > MAX_NUMERIC_VALUE) {
+      return NextResponse.json(
+        { error: `월세는 최대 ${MAX_NUMERIC_VALUE.toLocaleString()}까지 입력 가능합니다` },
+        { status: 400 }
+      );
+    }
+    
+    if (exclusive_m2 > MAX_NUMERIC_VALUE) {
+      return NextResponse.json(
+        { error: `전용면적은 최대 ${MAX_NUMERIC_VALUE.toLocaleString()}㎡까지 입력 가능합니다` },
+        { status: 400 }
+      );
+    }
+    
+    if (floor > 9999) { // 층수는 보통 4자리면 충분
+      return NextResponse.json(
+        { error: "층수는 최대 9999까지 입력 가능합니다" },
+        { status: 400 }
+      );
+    }
+    
+    if (floors_total && floors_total > 9999) {
+      return NextResponse.json(
+        { error: "총 층수는 최대 9999까지 입력 가능합니다" },
+        { status: 400 }
+      );
+    }
+
     // Generate unique code
     const code = `L${Date.now()}`;
 
