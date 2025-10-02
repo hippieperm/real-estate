@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       .from("listings")
       .select(`
         *,
-        images:listing_images(
+        listing_images(
           id,
           path,
           sort_order
@@ -172,6 +172,9 @@ export async function POST(request: NextRequest) {
         title: item.title,
         status: item.status,
         created_by: item.created_by,
+        hasImages: item.listing_images?.length > 0,
+        imageCount: item.listing_images?.length || 0,
+        firstImagePath: item.listing_images?.[0]?.path,
       })),
       requestedLimit: limit,
       requestedPage: page,
