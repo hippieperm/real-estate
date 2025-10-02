@@ -47,6 +47,7 @@ export default function CreateListingPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -70,6 +71,17 @@ export default function CreateListingPage() {
     return Number(numericValue).toLocaleString("ko-KR");
   };
 
+  const validateNumber = (value: string, fieldName: string, maxValue: number = 99999999) => {
+    const numericValue = value.replace(/,/g, "");
+    const num = Number(numericValue);
+    
+    if (num > maxValue) {
+      showError("입력 오류", `${fieldName}은(는) 최대 ${maxValue.toLocaleString()}까지 입력 가능합니다`);
+      return false;
+    }
+    return true;
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -79,6 +91,34 @@ export default function CreateListingPage() {
 
   const handleNumberInputChange = (field: string, value: string) => {
     const numericValue = value.replace(/,/g, "");
+    
+    // 실시간 검증
+    let maxValue = 99999999;
+    let fieldName = field;
+    
+    switch (field) {
+      case 'price_deposit':
+        fieldName = '보증금';
+        break;
+      case 'price_monthly':
+        fieldName = '월세';
+        break;
+      case 'exclusive_m2':
+        fieldName = '전용면적';
+        break;
+      case 'floor':
+      case 'building_floor':
+        maxValue = 9999;
+        fieldName = field === 'floor' ? '층수' : '총 층수';
+        break;
+    }
+    
+    const num = Number(numericValue);
+    if (numericValue && !isNaN(num) && num > maxValue) {
+      showError("입력 제한", `${fieldName}은(는) 최대 ${maxValue.toLocaleString()}까지 입력 가능합니다`);
+      return; // 입력을 무시
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [field]: numericValue,
@@ -105,6 +145,10 @@ export default function CreateListingPage() {
     setSelectedImages((prev) => [...prev, ...files]);
   };
 
+  const handleImageUrlChange = (urls: string[]) => {
+    setImageUrls(urls);
+  };
+
   const handleImageRemove = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
@@ -121,22 +165,60 @@ export default function CreateListingPage() {
       });
       formData.append("listingId", listingId);
 
+      console.log('Making upload request to /api/upload');
+      
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+      
+      console.log('Upload response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
+        console.log('Upload successful:', result);
         return result.images;
       } else {
-        throw new Error("이미지 업로드 실패");
+        const errorText = await response.text();
+        console.error('Upload failed with status:', response.status);
+        console.error('Error response:', errorText);
+        throw new Error(`이미지 업로드 실패 (${response.status}): ${errorText}`);
       }
     } catch (error) {
       console.error("Upload error:", error);
       throw error;
     } finally {
       setUploadingImages(false);
+    }
+  };
+
+  const saveImageUrls = async (listingId: string) => {
+    if (imageUrls.length === 0) return [];
+
+    try {
+      const response = await fetch("/api/images/save-urls", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listingId,
+          urls: imageUrls,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('URL images saved:', result);
+        return result.images;
+      } else {
+        const errorText = await response.text();
+        console.error('URL save failed:', errorText);
+        throw new Error(`URL 이미지 저장 실패: ${errorText}`);
+      }
+    } catch (error) {
+      console.error("URL save error:", error);
+      throw error;
     }
   };
 
@@ -182,13 +264,22 @@ export default function CreateListingPage() {
 
       const { listing } = await response.json();
 
-      // 2. 이미지 업로드 (선택사항)
+      // 2. 이미지 처리 (선택사항)
       if (selectedImages.length > 0) {
         try {
           await uploadImages(listing.id);
         } catch (imageError) {
-          console.error("Image upload error:", imageError);
-          // 이미지 업로드 실패해도 매물 등록은 성공으로 처리
+          console.error("File upload error:", imageError);
+          showError("파일 업로드 실패", `파일 업로드에 실패했습니다: ${imageError instanceof Error ? imageError.message : String(imageError)}`);
+        }
+      }
+
+      if (imageUrls.length > 0) {
+        try {
+          await saveImageUrls(listing.id);
+        } catch (urlError) {
+          console.error("URL save error:", urlError);
+          showError("URL 이미지 저장 실패", `URL 이미지 저장에 실패했습니다: ${urlError instanceof Error ? urlError.message : String(urlError)}`);
         }
       }
 
@@ -504,7 +595,7 @@ export default function CreateListingPage() {
                     onChange={(e) =>
                       handleNumberInputChange("price_deposit", e.target.value)
                     }
-                    placeholder="10,000"
+                    placeholder="10,000 (최대 99,999,999)"
                     required
                     className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
@@ -531,7 +622,7 @@ export default function CreateListingPage() {
                     onChange={(e) =>
                       handleNumberInputChange("price_monthly", e.target.value)
                     }
-                    placeholder="300"
+                    placeholder="300 (최대 99,999,999)"
                     className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
@@ -586,7 +677,7 @@ export default function CreateListingPage() {
                     onChange={(e) =>
                       handleNumberInputChange("exclusive_m2", e.target.value)
                     }
-                    placeholder="165.3"
+                    placeholder="165.3 (최대 99,999,999)"
                     required
                     className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
@@ -606,7 +697,7 @@ export default function CreateListingPage() {
                     onChange={(e) =>
                       handleNumberInputChange("floor", e.target.value)
                     }
-                    placeholder="15"
+                    placeholder="15 (최대 9,999)"
                     required
                     className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
@@ -633,7 +724,7 @@ export default function CreateListingPage() {
                     onChange={(e) =>
                       handleNumberInputChange("building_floor", e.target.value)
                     }
-                    placeholder="20"
+                    placeholder="20 (최대 9,999)"
                     className="h-14 border-2 border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium"
                   />
                 </div>
@@ -758,6 +849,7 @@ export default function CreateListingPage() {
                   value={uploadedImages}
                   onChange={handleImageUpload}
                   onRemove={handleImageRemove}
+                  onUrlChange={handleImageUrlChange}
                   maxFiles={10}
                 />
               </div>
