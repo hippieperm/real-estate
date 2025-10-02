@@ -30,10 +30,17 @@ export async function POST(request: NextRequest) {
       bounds, // Map bounds: { north, south, east, west }
     } = body;
 
-    // Start building the query - 기본 정보만 먼저 조회
+    // Start building the query - 이미지 정보도 함께 조회
     let queryBuilder = supabase
       .from("listings")
-      .select("*", { count: "exact" })
+      .select(`
+        *,
+        images:listing_images(
+          id,
+          path,
+          sort_order
+        )
+      `, { count: "exact" })
       .eq("status", "active");
 
     // Text search
