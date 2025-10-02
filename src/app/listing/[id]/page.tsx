@@ -291,11 +291,15 @@ export default async function ListingDetailPage({ params }: Props) {
                       <Link key={similar.id} href={`/listing/${similar.id}`}>
                         <Card className="hover:shadow-md transition-shadow cursor-pointer">
                           <div className="aspect-video bg-gray-200">
-                            {similar.images && similar.images.length > 0 ? (
+                            {similar.listing_images && similar.listing_images.length > 0 ? (
                               <img
-                                src={similar.images[0].path}
+                                src={similar.listing_images[0].path}
                                 alt={similar.title}
                                 className="object-cover w-full h-full rounded-t-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNjBMMTAwIDYwIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=";
+                                }}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
