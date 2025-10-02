@@ -291,11 +291,17 @@ export default async function ListingDetailPage({ params }: Props) {
                       <Link key={similar.id} href={`/listing/${similar.id}`}>
                         <Card className="hover:shadow-md transition-shadow cursor-pointer">
                           <div className="aspect-video bg-gray-200">
-                            <img
-                              src="https://via.placeholder.com/300x200"
-                              alt={similar.title}
-                              className="object-cover w-full h-full rounded-t-lg"
-                            />
+                            {similar.images && similar.images.length > 0 ? (
+                              <img
+                                src={similar.images[0].path}
+                                alt={similar.title}
+                                className="object-cover w-full h-full rounded-t-lg"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Building className="h-10 w-10 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                           <CardContent className="p-3">
                             <p className="font-semibold line-clamp-1">{similar.title}</p>
