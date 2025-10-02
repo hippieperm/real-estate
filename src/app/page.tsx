@@ -254,11 +254,17 @@ export default function HomePage() {
               >
                   <div className="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <img
-                      src={`https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(listing.title.slice(0, 10))}`}
-                      alt={listing.title}
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                    />
+                    {listing.images && listing.images.length > 0 ? (
+                      <img
+                        src={listing.images[0].path}
+                        alt={listing.title}
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building className="h-12 w-12 text-slate-400" />
+                      </div>
+                    )}
                     {listing.listing_themes?.length > 0 && (
                       <div className="absolute top-3 left-3">
                         <Badge className="gradient-blue text-white border-0 shadow-glow">
