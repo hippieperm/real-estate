@@ -211,7 +211,7 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {["all", "available", "reserved", "in_progress", "completed", "withdrawn", "hidden", "archived"].map((status) => (
+                  {["all", "active", "hidden", "archived"].map((status) => (
                     <Button
                       key={status}
                       variant={statusFilter === status ? "default" : "outline"}
@@ -229,7 +229,7 @@ export default function AdminPage() {
                       }}
                     >
                       <Filter className="h-4 w-4 mr-1" />
-                      {status === "all" ? "전체" : getStatusLabel(status as ListingStatus)}
+                      {status === "all" ? "전체" : status === "active" ? "활성" : status === "hidden" ? "숨김" : "보관됨"}
                     </Button>
                   ))}
                 </div>
@@ -239,7 +239,7 @@ export default function AdminPage() {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <CardContent className="p-8 relative">
@@ -271,7 +271,7 @@ export default function AdminPage() {
                     활성 매물
                   </p>
                   <p className="text-5xl font-black mb-1">
-                    {listings.filter((l) => isActiveStatus(l.status as ListingStatus)).length}
+                    {listings.filter((l) => l.status === "active").length}
                   </p>
                   <p className="text-emerald-200 text-xs font-medium">
                     Active Listings
@@ -284,43 +284,20 @@ export default function AdminPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-yellow-500 via-orange-600 to-red-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
+          <Card className="border-0 shadow-2xl bg-gradient-to-br from-purple-500 via-violet-600 to-fuchsia-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <CardContent className="p-8 relative">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-100 text-sm font-bold mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-yellow-200 rounded-full animate-pulse" />
-                    거래진행중
+                  <p className="text-purple-100 text-sm font-bold mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-purple-200 rounded-full animate-pulse" />
+                    비활성 매물
                   </p>
                   <p className="text-5xl font-black mb-1">
-                    {listings.filter((l) => ['reserved', 'in_progress'].includes(l.status)).length}
+                    {listings.filter((l) => l.status === "hidden" || l.status === "archived").length}
                   </p>
-                  <p className="text-yellow-200 text-xs font-medium">
-                    In Progress
-                  </p>
-                </div>
-                <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Building2 className="h-12 w-12 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600 text-white rounded-3xl overflow-hidden group hover:scale-105 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CardContent className="p-8 relative">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-bold mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse" />
-                    거래완료
-                  </p>
-                  <p className="text-5xl font-black mb-1">
-                    {listings.filter((l) => l.status === "completed").length}
-                  </p>
-                  <p className="text-green-200 text-xs font-medium">
-                    Completed
+                  <p className="text-purple-200 text-xs font-medium">
+                    Inactive Listings
                   </p>
                 </div>
                 <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-transform duration-300">
@@ -365,9 +342,15 @@ export default function AdminPage() {
 
                 <div className="absolute top-4 left-4 flex gap-2">
                   <Badge
-                    className={`${getStatusColor(listing.status as ListingStatus)} ${getStatusTextColor(listing.status as ListingStatus)} border-0 shadow-lg px-4 py-1.5 text-sm font-bold`}
+                    className={
+                      listing.status === "active"
+                        ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
+                        : listing.status === "hidden"
+                        ? "bg-gradient-to-r from-gray-500 to-slate-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
+                        : "bg-gradient-to-r from-purple-500 to-violet-600 text-white border-0 shadow-lg px-4 py-1.5 text-sm font-bold"
+                    }
                   >
-                    {getStatusIcon(listing.status as ListingStatus)} {getStatusLabel(listing.status as ListingStatus)}
+                    {listing.status === "active" ? "✅ 활성" : listing.status === "hidden" ? "👁️‍🗨️ 숨김" : "📦 보관됨"}
                   </Badge>
                 </div>
 

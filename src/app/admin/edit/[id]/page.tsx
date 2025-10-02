@@ -59,7 +59,7 @@ export default function EditListingPage() {
     address_detail: "",
     latitude: "",
     longitude: "",
-    status: "available",
+    status: "active",
   });
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function EditListingPage() {
           address_detail: listing.address_detail || "",
           latitude: listing.latitude?.toString() || "",
           longitude: listing.longitude?.toString() || "",
-          status: listing.status || "available",
+          status: listing.status || "active",
         };
 
         console.log("Setting form data:", formDataToSet);
@@ -477,13 +477,9 @@ export default function EditListingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      <SelectItem value="available">{getStatusIcon("available")} {getStatusLabel("available")}</SelectItem>
-                      <SelectItem value="reserved">{getStatusIcon("reserved")} {getStatusLabel("reserved")}</SelectItem>
-                      <SelectItem value="in_progress">{getStatusIcon("in_progress")} {getStatusLabel("in_progress")}</SelectItem>
-                      <SelectItem value="completed">{getStatusIcon("completed")} {getStatusLabel("completed")}</SelectItem>
-                      <SelectItem value="withdrawn">{getStatusIcon("withdrawn")} {getStatusLabel("withdrawn")}</SelectItem>
-                      <SelectItem value="hidden">{getStatusIcon("hidden")} {getStatusLabel("hidden")}</SelectItem>
-                      <SelectItem value="archived">{getStatusIcon("archived")} {getStatusLabel("archived")}</SelectItem>
+                      <SelectItem value="active">✅ 활성</SelectItem>
+                      <SelectItem value="hidden">👁️‍🗨️ 숨김</SelectItem>
+                      <SelectItem value="archived">📦 보관됨</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

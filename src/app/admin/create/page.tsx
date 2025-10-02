@@ -63,7 +63,7 @@ export default function CreateListingPage() {
     address_detail: "",
     latitude: "",
     longitude: "",
-    status: "available",
+    status: "active",
   });
 
   const formatNumber = (value: string) => {
@@ -521,7 +521,7 @@ export default function CreateListingPage() {
                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                     상태
                     <span className="text-xs text-slate-500 font-normal">
-                      (기본값: 매물가능)
+                      (기본값: 활성)
                     </span>
                   </Label>
                   <Select
@@ -534,26 +534,14 @@ export default function CreateListingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl shadow-2xl border-2 border-slate-200">
-                      <SelectItem value="available" className="text-lg font-medium py-4">
-                        {getStatusIcon("available")} {getStatusLabel("available")}
-                      </SelectItem>
-                      <SelectItem value="reserved" className="text-lg font-medium py-4">
-                        {getStatusIcon("reserved")} {getStatusLabel("reserved")}
-                      </SelectItem>
-                      <SelectItem value="in_progress" className="text-lg font-medium py-4">
-                        {getStatusIcon("in_progress")} {getStatusLabel("in_progress")}
-                      </SelectItem>
-                      <SelectItem value="completed" className="text-lg font-medium py-4">
-                        {getStatusIcon("completed")} {getStatusLabel("completed")}
-                      </SelectItem>
-                      <SelectItem value="withdrawn" className="text-lg font-medium py-4">
-                        {getStatusIcon("withdrawn")} {getStatusLabel("withdrawn")}
+                      <SelectItem value="active" className="text-lg font-medium py-4">
+                        ✅ 활성
                       </SelectItem>
                       <SelectItem value="hidden" className="text-lg font-medium py-4">
-                        {getStatusIcon("hidden")} {getStatusLabel("hidden")}
+                        👁️‍🗨️ 숨김
                       </SelectItem>
                       <SelectItem value="archived" className="text-lg font-medium py-4">
-                        {getStatusIcon("archived")} {getStatusLabel("archived")}
+                        📦 보관됨
                       </SelectItem>
                     </SelectContent>
                   </Select>
