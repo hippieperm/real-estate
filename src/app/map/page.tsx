@@ -391,8 +391,28 @@ export default function MapSearchPage() {
           position: markerPosition,
         });
 
+        // 마커를 맵에 추가하지 않고 클러스터러에만 추가하는 경우 이벤트가 작동하지 않을 수 있음
+        // clusterer를 사용하지 않는 경우 직접 맵에 추가
+        if (!clusterer) {
+          marker.setMap(mapInstance.current);
+        }
+
         window.kakao.maps.event.addListener(marker, "click", () => {
+          console.log("Marker clicked:", listing.title); // 디버깅용 로그
           setSelectedListing(listing);
+          
+          // 마커 클릭시 해당 위치로 지도 중심 이동
+          const markerLatLng = new window.kakao.maps.LatLng(lat, lng);
+          if (mapInstance.current) {
+            // panTo 사용하여 부드럽게 이동
+            if (typeof mapInstance.current.panTo === "function") {
+              console.log("Using panTo to move to:", lat, lng); // 디버깅용 로그
+              mapInstance.current.panTo(markerLatLng);
+            } else if (typeof mapInstance.current.setCenter === "function") {
+              console.log("Using setCenter to move to:", lat, lng); // 디버깅용 로그
+              mapInstance.current.setCenter(markerLatLng);
+            }
+          }
         });
 
         return marker;
@@ -400,6 +420,8 @@ export default function MapSearchPage() {
 
     if (clusterer) {
       clusterer.addMarkers(newMarkers);
+    } else {
+      // clusterer가 없는 경우는 위에서 이미 맵에 추가했음
     }
     markers.current = newMarkers;
   };
@@ -541,7 +563,22 @@ export default function MapSearchPage() {
                 <Card
                   key={listing.id}
                   className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 border-white/50 bg-white/90 backdrop-blur-sm group"
-                  onClick={() => setSelectedListing(listing)}
+                  onClick={() => {
+                    setSelectedListing(listing);
+                    
+                    // 리스트 카드 클릭시에도 해당 위치로 지도 중심 이동
+                    if (listing.latitude && listing.longitude && mapInstance.current) {
+                      const listingLatLng = new window.kakao.maps.LatLng(
+                        listing.latitude, 
+                        listing.longitude
+                      );
+                      if (typeof mapInstance.current.panTo === "function") {
+                        mapInstance.current.panTo(listingLatLng);
+                      } else if (typeof mapInstance.current.setCenter === "function") {
+                        mapInstance.current.setCenter(listingLatLng);
+                      }
+                    }
+                  }}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardHeader className="pb-3">
