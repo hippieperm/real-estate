@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
+  console.log('=== Upload API Request Started ===');
   try {
-    const supabase = await createServerComponentClient()
+    console.log('Creating Supabase client...');
+    const supabase = createAdminClient()
+    
+    console.log('Parsing form data...');
     const formData = await request.formData()
     
     const files = formData.getAll('files') as File[]
     const listingId = formData.get('listingId') as string
+    
+    console.log('Request data:', {
+      filesCount: files.length,
+      listingId,
+      fileDetails: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
+    });
     
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -69,9 +79,17 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error('=== Upload API Error ===');
+    console.error('Error type:', typeof error);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Full error:', error);
+    
     return NextResponse.json(
-      { error: '이미지 업로드에 실패했습니다' },
+      { 
+        error: '이미지 업로드에 실패했습니다',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
@@ -79,7 +97,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createServerComponentClient()
+    const supabase = createAdminClient()
     const { searchParams } = new URL(request.url)
     const imagePath = searchParams.get('path')
     const imageId = searchParams.get('id')
