@@ -246,8 +246,6 @@ export default function MapSearchPage() {
         limit: 100,
       };
 
-      console.log("Map page search request:", requestBody);
-
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -255,12 +253,6 @@ export default function MapSearchPage() {
       });
 
       const data = await response.json();
-      console.log("Map page search results:", {
-        response: response.status,
-        data,
-        listingsCount: data.listings?.length,
-        total: data.total,
-      });
       setListings(data.listings || []);
 
       // Update markers on map
@@ -504,83 +496,13 @@ export default function MapSearchPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Button
-                onClick={searchListings}
-                className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 font-semibold"
-              >
-                <Search className="mr-2 h-4 w-4" />
-                매물 검색
-              </Button>
-
-              {/* Debug Button */}
-              <Button
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/debug/listings");
-                    const data = await response.json();
-                    console.log("Debug data from map page:", data);
-                    alert(
-                      `디버그 정보:\n전체: ${data.totalCount}\n활성: ${data.activeCount}\n생성자 있음: ${data.summary.withCreatedBy}\n생성자 없음: ${data.summary.withoutCreatedBy}`
-                    );
-                  } catch (error) {
-                    console.error("Debug fetch error:", error);
-                    alert("디버그 데이터를 가져올 수 없습니다.");
-                  }
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full text-xs"
-              >
-                🔍 디버그 정보
-              </Button>
-
-              {/* Create Test Listing Button */}
-              <Button
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/test/create-dummy", {
-                      method: "POST",
-                    });
-                    const data = await response.json();
-                    console.log("Test listing created:", data);
-                    alert("테스트 매물이 생성되었습니다!");
-                    // 자동으로 검색 실행
-                    setTimeout(() => searchListings(), 1000);
-                  } catch (error) {
-                    console.error("Create test listing error:", error);
-                    alert("테스트 매물 생성에 실패했습니다.");
-                  }
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-              >
-                ➕ 테스트 매물 생성
-              </Button>
-
-              {/* Get All Listings Button */}
-              <Button
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/test/all-listings");
-                    const data = await response.json();
-                    console.log("All listings result:", data);
-                    alert(
-                      `전체 매물 조회 결과:\n총 개수: ${data.total}\n실제 조회: ${data.summary.total}\n생성자 있음: ${data.summary.withCreatedBy}\n생성자 없음: ${data.summary.withoutCreatedBy}`
-                    );
-                  } catch (error) {
-                    console.error("Get all listings error:", error);
-                    alert("전체 매물 조회에 실패했습니다.");
-                  }
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-              >
-                📊 전체 매물 조회
-              </Button>
-            </div>
+            <Button
+              onClick={searchListings}
+              className="w-full h-12 gradient-blue text-white border-0 shadow-glow hover:shadow-lg transition-all duration-300 font-semibold"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              매물 검색
+            </Button>
           </div>
 
           {/* Results List */}
