@@ -1,21 +1,28 @@
 "use client"
 
 import * as React from "react"
-import { Upload, X, Image as ImageIcon } from "lucide-react"
+import { Upload, X, Image as ImageIcon, Globe, HardDrive } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ImageUrlUpload } from "./image-url-upload"
+
+type UploadMode = 'file' | 'url'
 
 interface ImageUploadProps {
   value?: string[]
   onChange: (files: File[]) => void
   onRemove: (index: number) => void
+  onUrlChange?: (urls: string[]) => void
   maxFiles?: number
   className?: string
 }
 
 export const ImageUpload = React.forwardRef<HTMLInputElement, ImageUploadProps>(
-  ({ className, value = [], onChange, onRemove, maxFiles = 10, ...props }, ref) => {
+  ({ className, value = [], onChange, onRemove, onUrlChange, maxFiles = 10, ...props }, ref) => {
     const [dragActive, setDragActive] = React.useState(false)
     const [previews, setPreviews] = React.useState<string[]>([])
+    const [uploadMode, setUploadMode] = React.useState<UploadMode>('file')
+    const [imageUrls, setImageUrls] = React.useState<string[]>([])
     const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     const handleDrag = React.useCallback((e: React.DragEvent) => {
@@ -73,23 +80,54 @@ export const ImageUpload = React.forwardRef<HTMLInputElement, ImageUploadProps>(
       fileInputRef.current?.click()
     }
 
+    const handleUrlChange = React.useCallback((urls: string[]) => {
+      setImageUrls(urls)
+      if (onUrlChange) {
+        onUrlChange(urls)
+      }
+    }, [onUrlChange])
+
     return (
       <div className={cn("w-full", className)}>
-        {/* Upload Area */}
-        <div
-          className={cn(
-            "relative border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer",
-            dragActive 
-              ? "border-blue-500 bg-blue-50" 
-              : "border-gray-300 hover:border-gray-400",
-            value.length >= maxFiles && "opacity-50 cursor-not-allowed"
-          )}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={value.length < maxFiles ? handleClick : undefined}
-        >
+        {/* Mode Selection */}
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant={uploadMode === 'file' ? 'default' : 'outline'}
+            onClick={() => setUploadMode('file')}
+            className="flex items-center gap-2"
+          >
+            <HardDrive className="h-4 w-4" />
+            파일 업로드
+          </Button>
+          <Button
+            type="button"
+            variant={uploadMode === 'url' ? 'default' : 'outline'}
+            onClick={() => setUploadMode('url')}
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            URL 입력
+          </Button>
+        </div>
+
+        {uploadMode === 'file' ? (
+          <>
+            {/* File Upload Area */}
+            <div
+              className={cn(
+                "relative border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer",
+                dragActive 
+                  ? "border-blue-500 bg-blue-50" 
+                  : "border-gray-300 hover:border-gray-400",
+                value.length >= maxFiles && "opacity-50 cursor-not-allowed"
+              )}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              onClick={value.length < maxFiles ? handleClick : undefined}
+            >
           <input
             ref={fileInputRef}
             type="file"
@@ -171,10 +209,19 @@ export const ImageUpload = React.forwardRef<HTMLInputElement, ImageUploadProps>(
           </div>
         )}
 
-        {/* Upload Progress */}
-        <div className="mt-2 text-xs text-gray-500 text-center">
-          {value.length + previews.length} / {maxFiles} 이미지
-        </div>
+            {/* Upload Progress */}
+            <div className="mt-2 text-xs text-gray-500 text-center">
+              {value.length + previews.length} / {maxFiles} 이미지
+            </div>
+          </>
+        ) : (
+          /* URL Upload */
+          <ImageUrlUpload
+            value={imageUrls}
+            onChange={handleUrlChange}
+            maxUrls={maxFiles}
+          />
+        )}
       </div>
     )
   }
