@@ -66,6 +66,13 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
     ? listing.listing_images.map((img: any) => img.path)
     : sampleImages
 
+  console.log('Images debug:', {
+    hasListingImages: listing.listing_images && listing.listing_images.length > 0,
+    listingImagesLength: listing.listing_images?.length,
+    finalImagesLength: images.length,
+    showNavigation: images.length > 1
+  })
+
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length)
   }
@@ -127,22 +134,14 @@ export function ListingDetailModal({ listing, isOpen, onClose }: ListingDetailMo
             {/* Image Navigation */}
             {images.length > 1 && (
               <>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full"
-                >
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-slate-700 rounded-full shadow-lg border border-slate-200 z-20 w-12 h-12 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105"
+                     onClick={prevImage}>
                   <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full"
-                >
+                </div>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-slate-700 rounded-full shadow-lg border border-slate-200 z-20 w-12 h-12 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105"
+                     onClick={nextImage}>
                   <ChevronRight className="h-5 w-5" />
-                </Button>
+                </div>
               </>
             )}
 
