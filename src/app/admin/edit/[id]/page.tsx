@@ -43,6 +43,7 @@ export default function EditListingPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -167,6 +168,10 @@ export default function EditListingPage() {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleUrlChange = (urls: string[]) => {
+    setImageUrls(urls);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -221,6 +226,55 @@ export default function EditListingPage() {
       });
 
       if (response.ok) {
+        // 파일 이미지 업로드
+        if (selectedImages.length > 0) {
+          try {
+            setUploadingImages(true);
+            const formData = new FormData();
+            selectedImages.forEach((file) => {
+              formData.append('files', file);
+            });
+            formData.append('listingId', listingId);
+
+            const uploadResponse = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              console.error('File upload error:', error);
+            }
+          } catch (error) {
+            console.error('Upload error:', error);
+          } finally {
+            setUploadingImages(false);
+          }
+        }
+
+        // URL 이미지 저장
+        if (imageUrls.length > 0) {
+          try {
+            const urlResponse = await fetch('/api/images/save-urls', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                listingId: listingId,
+                urls: imageUrls,
+              }),
+            });
+
+            if (!urlResponse.ok) {
+              const error = await urlResponse.json();
+              console.error('URL save error:', error);
+            }
+          } catch (error) {
+            console.error('URL save error:', error);
+          }
+        }
+
         showSuccess("성공", "매물이 성공적으로 수정되었습니다!");
         router.push("/admin");
       } else {
@@ -705,6 +759,7 @@ export default function EditListingPage() {
                 value={existingImages}
                 onChange={handleImageUpload}
                 onRemove={handleImageRemove}
+                onUrlChange={handleUrlChange}
                 maxFiles={10}
               />
               {uploadingImages && (
