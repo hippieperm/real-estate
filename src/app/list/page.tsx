@@ -693,11 +693,21 @@ export default function ListSearchPage() {
                       <>
                         {/* Image Section */}
                         <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
-                          <img
-                            src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop"
-                            alt={listing.title}
-                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
-                          />
+                          {listing.listing_images && listing.listing_images.length > 0 ? (
+                            <img
+                              src={listing.listing_images[0].path}
+                              alt={listing.title}
+                              className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDIwMCAxNTAiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPHN2Zz4K";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Building2 className="h-16 w-16 text-slate-400" />
+                            </div>
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                           {/* Favorite Button */}
@@ -783,11 +793,21 @@ export default function ListSearchPage() {
                       /* List View */
                       <div className="flex p-4">
                         <div className="w-48 h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl overflow-hidden relative flex-shrink-0">
-                          <img
-                            src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=200&h=130&fit=crop"
-                            alt={listing.title}
-                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
-                          />
+                          {listing.listing_images && listing.listing_images.length > 0 ? (
+                            <img
+                              src={listing.listing_images[0].path}
+                              alt={listing.title}
+                              className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEzMCIgdmlld0JveD0iMCAwIDIwMCAxMzAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTMwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNjVMMTAwIDY1IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Building2 className="h-8 w-8 text-slate-400" />
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex-1 ml-6 flex justify-between">
